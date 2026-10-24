@@ -12,7 +12,7 @@ use crate::store::tasks::{update_wait, Change, Task};
 /// When the turn began; where only the end of the file was read and holds no prompt, the whole file is read this once.
 fn began(t: &Task, turn: &Turn) -> Option<i64> {
     if turn.began > 0 { return Some(turn.began); }
-    let all = read_turn_of(t.s("agent"), turn.file.as_deref(), "", std::path::Path::new("."), true)?;
+    let all = read_turn_of(t.s("agent"), turn.file.as_deref(), t.s("session"), std::path::Path::new("."), true)?;
     (all.id == turn.id).then_some(all.began)
 }
 fn same_turn(t: &Task, turn: Option<&Turn>) -> bool {

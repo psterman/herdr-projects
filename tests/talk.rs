@@ -126,6 +126,51 @@ fn a_screen_cut_at_its_own_width_is_put_back_into_the_lines_it_was_one() {
     assert!(!text.contains("Hermes"), "the frame it drew around its words is left out: {text}");
 }
 
+#[test]
+fn a_hermes_conversation_is_read_from_the_store_it_keeps() {
+    use rusqlite::Connection;
+    let dir = std::env::temp_dir().join(format!("sw-hermes-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    std::fs::create_dir_all(&dir).unwrap();
+    let db = dir.join("state.db");
+    {
+        let con = Connection::open(&db).unwrap();
+        con.execute_batch("create table sessions (id text primary key, model text, input_tokens integer, output_tokens integer);
+            create table messages (id integer primary key, session_id text, role text, content text, timestamp real, tool_name text, finish_reason text);").unwrap();
+        con.execute("insert into sessions values ('s1', 'MiniMax-M3.1-Flash', 100, 20)", []).unwrap();
+        // a prompt, a call of its own, the tool's words, and the answer
+        for (id, role, content, ts, why) in [(1i64, "user", "Fix the greeting", 1.0, ""), (2, "assistant", "", 2.0, "tool_calls"),
+            (3, "tool", "the file has three lines", 3.0, ""), (4, "assistant", "Fixed.", 4.0, "stop")] {
+            con.execute("insert into messages values (?1, 's1', ?2, ?3, ?4, '', ?5)", rusqlite::params![id, role, content, ts, why]).unwrap();
+        }
+    }
+    unsafe { std::env::set_var("HERMES_HOME", &dir); }
+    let rows = sw::agents::hermes_store::rows_in(&db, "s1").unwrap();
+    assert_eq!(rows.len(), 4);
+    let said = sw::agents::hermes_store::talk(&rows);
+    assert_eq!(said.iter().map(|m| format!("{}: {}", if m.you { "you" } else { "them" }, m.text)).collect::<Vec<_>>(), vec!["you: Fix the greeting", "them: Fixed."]);
+    let turn = sw::agents::hermes_store::turn(&rows).unwrap();
+    assert!(turn.finished && !turn.pending, "the answer ends the turn: {turn:?}");
+    assert_eq!(turn.said, "Fixed.");
+    assert_eq!(turn.id, "4");
+    assert_eq!(turn.began, 1000, "the prompt began the turn: {turn:?}");
+    let turn = sw::agents::hermes_store::turn_in(&db, "s1").unwrap();
+    assert_eq!(turn.model, "MiniMax-M3.1-Flash");
+    assert_eq!(turn.usage.unwrap().out, 20.0);
+    assert_eq!(sw::agents::hermes_store::holds_in(&db, "s1", "Fix the greeting", 0), Some(true));
+    assert_eq!(sw::agents::hermes_store::holds_in(&db, "s1", "Fix the greeting", 5000), Some(false), "it was written before that moment");
+    assert_eq!(sw::agents::hermes_store::holds_in(&db, "s1", "nothing of it", 0), Some(false));
+    assert!(sw::agents::hermes_store::rows_in(&db, "other").unwrap().is_empty());
+    // The board's own ways in: the words of a chat, and the end of a turn.
+    let words = talk_of("hermes", None, "s1", Path::new("/"), 50).unwrap();
+    assert_eq!(words.iter().map(|m| format!("{}: {}", if m.you { "you" } else { "them" }, m.text)).collect::<Vec<_>>(), vec!["you: Fix the greeting", "them: Fixed."]);
+    let turn = sw::agents::installed::read_turn_of("hermes", None, "s1", Path::new("/"), false).unwrap();
+    assert!(turn.finished && turn.said == "Fixed.", "the end of the turn is read from the store: {turn:?}");
+    assert_eq!(sw::agents::installed::said_to("hermes", None, "s1", Path::new("/"), "Fix the greeting", 0), Some(true));
+    assert!(sw::agents::installed::read_turn_of("hermes", None, "none", Path::new("/"), false).is_none(), "a conversation that is not there is nothing to read");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 use crate::common;
 use common::*;
 use sw::board::keys::key_name;

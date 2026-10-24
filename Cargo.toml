@@ -73,6 +73,8 @@ crossterm.workspace = true
 fancy-regex.workspace = true
 libc.workspace = true
 ratatui.workspace = true
+# The store a Hermes agent keeps its conversation in, for the test that builds one (agents/hermes_store.rs).
+rusqlite = { version = "0.40.2", features = ["bundled"] }
 
 [profile.release]
 opt-level = "s"

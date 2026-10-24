@@ -24,3 +24,4 @@ toml.workspace = true
 yaml-rust2.workspace = true
 unicode-segmentation.workspace = true
 unicode-width.workspace = true
+rusqlite = { version = "0.40.2", features = ["bundled"] }

@@ -58,6 +58,8 @@ fn file_for(k: &str, file: Option<&Path>, session: &str, cwd: &Path) -> Option<P
 /// The end of a task's (or its reviewer's) saved conversation, or None. `whole`: the whole file is read.
 pub fn read_turn_of(k: &str, file: Option<&Path>, session: &str, cwd: &Path, whole: bool) -> Option<Turn> {
     if !kind(k).map(|a| a.reads_turn).unwrap_or(false) { return None; }
+    // A program that keeps its conversation in a store of its own (Hermes) has no file: the store holds it.
+    if let Some(t) = super::hermes_store::turn_of(k, session) { return Some(t); }
     let f = file_for(k, file, session, cwd)?;
     let mut t = read_turn(k, &f, if whole { u64::MAX } else { TAIL })?;
     t.file = Some(f);
@@ -66,6 +68,7 @@ pub fn read_turn_of(k: &str, file: Option<&Path>, session: &str, cwd: &Path, who
 /// Was this text submitted to the agent since a moment: do the words stand in its saved conversation? None: nothing to read.
 pub fn said_to(k: &str, file: Option<&Path>, session: &str, cwd: &Path, text: &str, since: i64) -> Option<bool> {
     if !kind(k).map(|a| a.reads_turn).unwrap_or(false) { return None; }
+    if let Some(h) = super::hermes_store::holds_of(k, session, text, since) { return Some(h); }
     let f = file_for(k, file, session, cwd)?;
     holds(&f, &super::hand_limits::as_typed(text), since).ok() // a long one went in as a line naming its file
 }

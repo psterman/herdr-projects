@@ -1,6 +1,7 @@
 //! The text of a saved conversation, one reader per agent program: what was said to the program and what it said
 //! back, oldest first. Only words: no tool call, no tool's output, no thinking, nothing the program wrote for itself.
 //! It is what the board shows of a chat (the box, the task panel, the web board).
+use super::hermes_store;
 use super::read_turn::{tail_lines, when, TAIL};
 use super::talk_commands::{self as cmd, claude_markup, is_stop, STOPPED};
 use crate::json::*;
@@ -14,7 +15,7 @@ fn text_of(c: &Value, types: &[&str]) -> String {
     match c { Value::String(s) => s.trim().to_string(), Value::Array(a) => a.iter().filter(|x| types.contains(&x.s("type"))).map(|x| x.t("text")).collect::<String>().trim().to_string(), _ => String::new() }
 }
 /// Two entries in a row from the same side with the same words are one.
-fn add(out: &mut Vec<Said>, you: bool, text: &str, at: i64) {
+pub(super) fn add(out: &mut Vec<Said>, you: bool, text: &str, at: i64) {
     let t = text.trim();
     if t.is_empty() || out.last().map(|l| l.you == you && l.text == t).unwrap_or(false) { return; }
     out.push(Said { you, text: t.to_string(), at });
@@ -122,7 +123,7 @@ fn pi_talk(rows: &[Value]) -> Vec<Said> {
     }
     out
 }
-fn reader(kind: &str) -> Option<fn(&[Value]) -> Vec<Said>> { match kind { "claude" => Some(claude_talk), "codex" => Some(codex_talk), "pi" => Some(pi_talk), _ => None } }
+fn reader(kind: &str) -> Option<fn(&[Value]) -> Vec<Said>> { match kind { "claude" => Some(claude_talk), "codex" => Some(codex_talk), "pi" => Some(pi_talk), "hermes" => Some(hermes_store::talk), _ => None } }
 pub fn can_read_talk(kind: &str) -> bool { reader(kind).is_some() }
 
 // Read again only when the file changed, and a conversation's file is looked for once: the board asks on every beat.
@@ -132,6 +133,8 @@ const FAR: u64 = 6 * 1024 * 1024;
 /// The end of a conversation's text: the last `keep` things said, or None where nothing can be read. Never fails.
 pub fn talk_of(kind: &str, file: Option<&Path>, session: &str, cwd: &Path, keep: usize) -> Option<Vec<Said>> {
     let read = reader(kind)?;
+    // A program that keeps its conversation in a store of its own (Hermes) has no file: the store holds it.
+    if let Some(list) = hermes_store::talk_of(kind, session, keep) { return Some(list); }
     let mut f = file.filter(|f| f.exists()).map(|f| f.to_path_buf());
     let key = format!("{kind}|{session}|{}", cwd.display());
     if f.is_none() && !session.is_empty() {
@@ -151,4 +154,4 @@ pub fn talk_of(kind: &str, file: Option<&Path>, session: &str, cwd: &Path, keep:
     cache.insert(f, (mtime, size, list.clone()));
     Some(tail_of(&list, keep))
 }
-fn tail_of(list: &[Said], keep: usize) -> Vec<Said> { list[list.len().saturating_sub(keep)..].to_vec() }
+pub(super) fn tail_of(list: &[Said], keep: usize) -> Vec<Said> { list[list.len().saturating_sub(keep)..].to_vec() }

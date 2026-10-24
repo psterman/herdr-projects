@@ -150,7 +150,7 @@ fn finish_steps(id: &str, g: &mut Guard, mut t: Task, ev: Option<Value>, force: 
                 // the same, seen through herdr alone: this "idle" is handled, the helper's answer brings the next one
                 if still_at_work(&k, Some(x), t.i("startedAgentAt")) { let c = comp.clone(); let _ = update_wait(id, 10000, |t| { t.obj_mut("handled").put("comp", c.clone()); Ok(Change::Write) }); return Ok(()); }
                 // The file must have stood still through the settle wait: a message followed by more work is not the end.
-                let again = x.file.as_deref().and_then(|f| installed::read_turn_of(&k, Some(f), "", &cwd_of(&t), false));
+                let again = match x.file.as_deref() { Some(f) => installed::read_turn_of(&k, Some(f), "", &cwd_of(&t), false), None => installed::read_turn_of(&k, None, &session, &cwd_of(&t), false) };
                 if again.map(|y| y.id != x.id || y.pos != x.pos).unwrap_or(true) { return Ok(()); }
                 if t.b("hooked") { let _ = count_mark(&format!("hook:{k}"), &ver, false); }
             }

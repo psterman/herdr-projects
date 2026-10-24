@@ -8,6 +8,7 @@ use super::rules_place::intro_line_of;
 use super::state::{get, home, pumping};
 use super::who::{choice_of, describe, same_choice};
 use crate::agents::adapter;
+use crate::agents::hermes_store;
 use crate::agents::installed::read_turn_of;
 use crate::agents::kinds::kind;
 use crate::agents::read_turn::Turn;
@@ -19,7 +20,7 @@ use crate::herdr::Herdr;
 use crate::json::*;
 use crate::store::marks::due;
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::{LazyLock, Mutex};
 
 /// The Coordinator as the board shows it.
@@ -32,8 +33,13 @@ pub struct Look {
     pub asks: String, pub began: i64, pub at: i64,
 }
 /// A transcript's last read, by when it changed and its size: two writes inside one tick of the file system's clock
-/// keep its time, never its size.
-static TURNS: LazyLock<Mutex<HashMap<String, (PathBuf, (std::time::SystemTime, u64), Option<Turn>)>>> = LazyLock::new(Default::default);
+/// keep its time, never its size. A conversation in a store of its own is marked by its newest message instead.
+static TURNS: LazyLock<Mutex<HashMap<String, (PathBuf, (i64, u64), Option<Turn>)>>> = LazyLock::new(Default::default);
+/// When a conversation's file changed, and how big it is.
+fn file_mark(f: &Path) -> Option<(i64, u64)> {
+    let m = std::fs::metadata(f).ok()?;
+    Some((m.modified().ok()?.duration_since(std::time::UNIX_EPOCH).ok()?.as_millis() as i64, m.len()))
+}
 static SCREENS: LazyLock<Mutex<HashMap<String, (String, i64, String)>>> = LazyLock::new(Default::default);
 /// What you said, without what the board put around it on its way in.
 fn bare(text: &str, co: &Co) -> String {
@@ -61,18 +67,21 @@ pub fn look(co: impl Into<Co>) -> Look {
         let k = r.t("kind");
         let session = if due(&co.mark("coordinator-session"), 3000) { active(&co, &c) } else { c.so("session").map(String::from) };
         let key = format!("{}|{}", co.key(), session.clone().unwrap_or_default());
+        let h = home(&co);
+        let s = session.clone().unwrap_or_default();
         let mut cache = TURNS.lock().unwrap();
         let hit = cache.get(&key).cloned();
         let mut file = hit.as_ref().map(|h| h.0.clone());
-        if let Some(s) = &session { if file.as_ref().map(|f| !f.exists()).unwrap_or(true) { file = adapter::transcript(&k, s, &home(&co)); } }
-        if let Some(f) = &file {
-            let mark = std::fs::metadata(f).ok().and_then(|m| Some((m.modified().ok()?, m.len())));
-            if mark != hit.as_ref().map(|h| h.1) { cache.insert(key.clone(), (f.clone(), mark.unwrap_or((std::time::UNIX_EPOCH, 0)), read_turn_of(&k, Some(f), "", &home(&co), false))); }
-            turn = cache.get(&key).and_then(|h| h.2.clone());
-            drop(cache);
-            let h = home(&co);
-            talk = talk_of(&k, Some(f), "", &h, 12).unwrap_or_default().into_iter().map(|m| if m.you { Said { text: bare(&m.text, &co), ..m } } else { m }).filter(|m| !m.text.is_empty()).collect();
+        if let Some(sess) = &session { if file.as_ref().map(|f| !f.exists()).unwrap_or(true) { file = adapter::transcript(&k, sess, &h); } }
+        // A program that keeps its conversation in a store of its own (Hermes) has no file: the store holds it, and
+        // its mark is the newest message of it.
+        let mark = match &file { Some(f) => file_mark(f), None => hermes_store::mark_of(&k, &s).map(|m| (m.0, m.1 as u64)) };
+        if let Some(m) = mark {
+            if hit.as_ref().map(|x| x.1) != Some(m) { cache.insert(key.clone(), (file.clone().unwrap_or_default(), m, read_turn_of(&k, file.as_deref(), &s, &h, false))); }
         }
+        turn = cache.get(&key).and_then(|h| h.2.clone());
+        drop(cache);
+        talk = talk_of(&k, file.as_deref(), &s, &h, 12).unwrap_or_default().into_iter().map(|m| if m.you { Said { text: bare(&m.text, &co), ..m } } else { m }).filter(|m| !m.text.is_empty()).collect();
     }
     let queue = c.arr("queue").len();
     let state = if c.b("starting") && pumping(&c) { "starting" } else { match status.as_deref() { Some("working") => "working", Some("blocked") => "blocked", Some(_) => "idle", None => if c.b("stopped") && !c.b("want") { "exited" } else if busy || queue > 0 { "starting" } else if c.b("run") { "exited" } else { "none" } } };

@@ -5,6 +5,7 @@ pub mod adapter;
 pub mod codex_trust;
 pub mod efforts;
 pub mod hand_limits;
+pub mod hermes_store;
 pub mod helpers;
 pub mod homes;
 pub mod installed;

@@ -122,7 +122,7 @@ pub fn resumable(t: &Task) -> bool {
     let k = t.s("agent");
     if !t.b("session") || adapter::resume_args(k, "x").is_empty() { return false; }
     if !crate::agents::kinds::kind(k).map(|a| a.reads_turn).unwrap_or(false) { return t.b("sent") || t.b("said"); }
-    adapter::transcript(k, t.s("session"), &cwd_of(t)).is_some()
+    adapter::has_conversation(k, t.s("session"), &cwd_of(t))
 }
 /// The prompt for an agent that is started again on a task it worked on before: (resume, prompt).
 pub fn again_prompt(t: &Task, waiting: &[String]) -> (Option<String>, String) {

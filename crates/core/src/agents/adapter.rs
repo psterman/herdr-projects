@@ -107,6 +107,10 @@ pub fn transcript(kind: &str, session: &str, cwd: &Path) -> Option<PathBuf> {
         _ => None,
     }
 }
+/// Does the program still have that conversation? A file of lines it wrote, or a store of its own (Hermes).
+pub fn has_conversation(kind: &str, session: &str, cwd: &Path) -> bool {
+    match kind { "hermes" => super::hermes_store::has_session(session), _ => transcript(kind, session, cwd).is_some() }
+}
 fn mtime_ms(f: &Path) -> Option<i64> { fs::metadata(f).and_then(|m| m.modified()).ok().and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok()).map(|d| d.as_millis() as i64) }
 fn first_line(s: &str) -> &str { s.split('\n').next().unwrap_or("") }
 /// The newest conversation saved in a folder since a time: the program's own "new chat" command starts another one.

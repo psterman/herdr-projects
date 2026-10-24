@@ -1,7 +1,8 @@
-//! herdr's other programs: the ones it has an integration for (`herdr integration install`). The board reads none of
-//! their conversations: herdr's own state says when a turn ended, and the agent's closing note says what it said. Every
-//! entry is plain data, read off the program's own `--help` (the version in `checked`); docs/agents.md says what each
-//! one can do and what was tried for real.
+//! herdr's other programs: the ones it has an integration for (`herdr integration install`). Of these, the board reads
+//! the conversation of the one that keeps it in a store of its own (Hermes); of the others it reads none: herdr's own
+//! state says when a turn ended, and the agent's closing note says what it said. Every entry is plain data, read off
+//! the program's own `--help` (the version in `checked`); docs/agents.md says what each one can do and what was tried
+//! for real.
 use super::{Headless, Kind, Login, Models, Read, BASE, NO_MODELS};
 
 const ANSWER: &[&str] = &["{}"];
@@ -35,9 +36,10 @@ pub static KINDS: &[Kind] = &[
         resume: &["--resume", "{}"], session: &["--session-id", "{}"],
         headless: Some(Headless { args: &[], model: &["-m", "{}"], system: &["--rules", "{}"], prompt: &["-p", "{}"] }),
         checked: "flags from grok --help 1.0.52; started by herdr 0.9.3 on the board's flags (it came up at its login)", ..BASE },
-    // `hermes chat`: the interactive chat, whose model can be given at start.
+    // `hermes chat`: the interactive chat, whose model can be given at start. Its conversation is in a store of its own
+    // (hermes_store.rs), not in a file of lines.
     Kind { name: "hermes", integration: "hermes", lead: &["chat"], model: &["-m", "{}"], access_full: &["--yolo"], resume: &["--resume", "{}"],
-        rules_file: Some("AGENTS.md"),
+        rules_file: Some("AGENTS.md"), reads_turn: true,
         headless: Some(Headless { args: &["--ignore-rules"], model: &["-m", "{}"], system: &[], prompt: &["-z", "{}"] }),
         checked: "flags from hermes --help 0.19.0; started by herdr 0.9.3 on the board's flags (its first setup)", ..BASE },
     Kind { name: "kilo", integration: "kilo", model: &["-m", "{}"], access_full: &["--auto"], resume: &["--session", "{}"], rules_file: Some("AGENTS.md"),

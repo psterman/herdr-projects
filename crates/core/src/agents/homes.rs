@@ -8,3 +8,4 @@ pub fn codex_file() -> PathBuf { env("HERDR_PROJECTS_CODEX_TOML").unwrap_or_else
 pub fn claude_home() -> PathBuf { env("CLAUDE_CONFIG_DIR").unwrap_or_else(|| user_home().join(".claude")) }
 pub fn codex_home() -> PathBuf { env("CODEX_HOME").unwrap_or_else(|| user_home().join(".codex")) }
 pub fn pi_home() -> PathBuf { env("PI_CODING_AGENT_DIR").unwrap_or_else(|| user_home().join(".pi").join("agent")) }
+pub fn hermes_home() -> PathBuf { env("HERMES_HOME").unwrap_or_else(|| user_home().join(".hermes")) }
