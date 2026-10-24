@@ -121,9 +121,32 @@ fn a_screen_cut_at_its_own_width_is_put_back_into_the_lines_it_was_one() {
     assert!(text.contains("picking an option from a previous board interaction"), "and this one: {text}");
     assert!(text.contains("the herdr transcript"), "the last word of the screen too: {text}");
     assert!(text.contains("「1」我看不出指向什么——板上没有任务。"), "the words of another tongue stay: {text}");
-    assert!(text.contains("MiniMax-M3.1-Flash"), "the bar of status stands: {text}");
-    assert!(text.contains("Set a reminder"), "and the box of the program: {text}");
+    assert!(!text.contains("MiniMax-M3.1-Flash"), "the bar of status it draws for itself is left out: {text}");
+    assert!(!text.contains("Set a reminder"), "and the box it types in: {text}");
     assert!(!text.contains("Hermes"), "the frame it drew around its words is left out: {text}");
+}
+
+#[test]
+fn a_program_s_own_rows_are_left_out_of_its_words_and_the_menu_it_offers_is_kept() {
+    // The screen of a program that draws a bar of status for itself, and a box it types in.
+    let screen = ["Welcome to Hermes Agent! Type your message or /help for commands.",
+        "✦ Tip: The skills audit log at ~/.hermes/skills/.hub/audit.log tracks every install and removal operation.",
+        "", "────────────────────────────────────────", "● 你好",
+        "────────────────────────────────────────", "",
+        "╭─ ☤ Hermes ─────────────────────────────────────────────────╮", "你好。",
+        "╰────────────────────────────────────────────────────────────╯",
+        " ☤ MiniMax-M3.1-Flash │ 52K/1M │ [░░░░░░░░░░] 5% │ ◎ 99.5% │ ◷ 2.2s │ ⚠ YOLO   ─ 报到并说明当前模型名",
+        "────────────────────────────────────────────────────────────",
+        "❯ Set a reminder or schedule a recurring task",
+        "────────────────────────────────────────────────────────────"].join("\n");
+    let text = screen_text(&screen);
+    assert!(text.contains("你好。"), "the words it said stand: {text}");
+    assert!(!text.contains("MiniMax-M3.1-Flash"), "the bar of status it draws for itself is left out: {text}");
+    assert!(!text.contains("Set a reminder"), "and the box it types in: {text}");
+    // A menu of its own choices is not the box it types in: it stays.
+    let splash = [">_ OpenAI Codex (v0.162.1)", "╭──────────────────╮", "│ Which colour?    │", "│ ❯ 1. Blue        │", "╰──────────────────╯",
+        "────────────────────", "▁▂▃▄▅▆▇█ 80%"].join("\n");
+    assert_eq!(screen_text(&splash), ">_ OpenAI Codex (v0.162.1)\nWhich colour?\n❯ 1. Blue");
 }
 
 #[test]
@@ -228,3 +251,4 @@ fn a_review_under_way_shows_what_the_reviewer_says_never_its_screen_and_a_workin
     let (_, b) = chat_box(&mut s);
     assert_eq!(b, vec!["Made f.", "", "❯ Send message to the agent"]);
 }
+
