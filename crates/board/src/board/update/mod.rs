@@ -114,5 +114,6 @@ pub mod setup;
 pub mod shows;
 pub mod size;
 pub mod skills;
+pub mod talk_whole;
 pub mod web;
 pub mod web_ui;

@@ -93,6 +93,9 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
     let scroll = is(p, K::Up) || is(p, K::Down);
     if s.full && scroll { return act::scroll_panel(s, if is(p, K::Up) { -1 } else { 1 }); }
     if s.full && (is(p, K::PageUp) || is(p, K::PageDown)) { let by = s.panel_height.saturating_sub(1).max(1) as i64; return act::scroll_panel(s, if is(p, K::PageUp) { -by } else { by }); }
+    // The conversation on its own scrolls as the panel does: up and down a line, a page up and a page down a page.
+    if s.chat_whole && scroll { return act::scroll_panel(s, if is(p, K::Up) { -1 } else { 1 }); }
+    if s.chat_whole && (is(p, K::PageUp) || is(p, K::PageDown)) { let by = s.panel_height.saturating_sub(1).max(1) as i64; return act::scroll_panel(s, if is(p, K::PageUp) { -by } else { by }); }
     let key = typed(p, |k| has_run(k.id));
     if let Some(k) = key { if on(s, k, r.as_ref()) { return run_as(s, k, p, r.as_ref(), fx); } }
     s.input.handle(p);
@@ -149,6 +152,7 @@ pub fn run_as(s: &mut State, k: K, p: &Press, r: Option<&Obj>, fx: &mut Vec<Effe
         K::ChatMessage => super::chat::toggle(s, fx),
         K::ChatScrollUp => { let by = super::chat::page(s); super::chat::scroll(s, -by); }
         K::ChatScrollDown => { let by = super::chat::page(s); super::chat::scroll(s, by); }
+        K::ChatWhole => super::talk_whole::toggle(s, fx),
         K::Side => if !s.full { act::toggle_side(s, fx) },
         K::Panel => if s.full { act::fold_panel(s) } else { act::open_panel(s) },
         K::ArchiveView => act::toggle_archive(s),

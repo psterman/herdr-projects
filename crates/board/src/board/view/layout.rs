@@ -89,12 +89,13 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
     // Each part is drawn under a guard (guard.rs): one that fails says so in its place, and the rest is there.
     let mut broke: Vec<String> = vec![];
     let who = super::guard::part(|| chat_of(s, t, r.as_ref())).unwrap_or_else(|why| { broke.push(format!("The chat could not be shown: {why}")); None });
-    let mut chat = chat_lines(who.as_ref(), width, rows_n < 16);
+    // The conversation on its own has nothing above the line you type on: no head, no rule, no empty line.
+    let mut chat = if s.chat_whole { vec![] } else { chat_lines(who.as_ref(), width, rows_n < 16) };
     let head_n = chat.len();
     let auto = s.auto().cloned();
     // The skill list over the box (skills.rs) takes the message's room while it shows.
     let picks = super::guard::part(|| super::skills::skill_lines(s, t, width, rows_n / 3)).unwrap_or_default();
-    s.chat_folded = (s.full || s.auto_open || s.menu.is_some() || !picks.is_empty() || rows_n < 14) && !who.as_ref().map(|w| w.always).unwrap_or(false);
+    s.chat_folded = (s.full || s.auto_open || s.menu.is_some() || !picks.is_empty() || s.chat_whole || rows_n < 14) && !who.as_ref().map(|w| w.always).unwrap_or(false);
     let framed = !s.chat_folded && s.ask.is_none() && chat_up(s, who.as_ref()) && who.as_ref().map(|w| w.said).unwrap_or(false) && width >= 8;
     // What just happened, on a line of its own: the hints below it stay readable.
     let stale = if s.stale.is_empty() { String::new() } else if !s.ctx.can_reload { "herdr-projects was updated: close the board and open it again for the new version.".into() } else { "herdr-projects was updated: the new version loads when nothing is half typed.".into() };
@@ -107,13 +108,14 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
     let said: Vec<Inked> = broke.iter().map(|b| failed(b, width)).chain(said).collect();
     // The text box grows with a draft that wraps, up to half the window: a longer draft scrolls inside it.
     let box_rows = (rows_n as i64 - 4 - head_n as i64 - if super::textbox::airy(s) { 2 } else { 0 } - if selected_job.is_some() { 1 } else { 0 }).min((rows_n / 2).max(5) as i64).max(1) as usize;
-    let (mut input, mut cursor) = super::guard::part(|| if s.ask.is_some() { (super::ask::ask_lines(s, width, rows_n), None) } else if (framed || super::chat_title::title(s, r.as_ref()).is_some()) && width >= 8 { chat_box(s, width, box_rows, r.as_ref(), &[]) } else { box_lines(s, width, box_rows, r.as_ref()) })
+    let (mut input, mut cursor) = super::guard::part(|| if s.ask.is_some() { (super::ask::ask_lines(s, width, rows_n), None) } else if s.chat_whole { super::textbox::bare_line(s, width, r.as_ref()) } else if (framed || super::chat_title::title(s, r.as_ref()).is_some()) && width >= 8 { chat_box(s, width, box_rows, r.as_ref(), &[]) } else { box_lines(s, width, box_rows, r.as_ref()) })
         .unwrap_or_else(|why| (vec![Inked::of("─".repeat(width), Ink::Rule), failed(&format!("The text box could not be shown: {why}"), width), Inked::of("─".repeat(width), Ink::Rule)], None));
     // The message takes the lines it needs: with its box up to two thirds of the window, and only rows the list can
     // spare. Under the whole task and the menu it keeps to a third. A longer one scrolls.
     s.chat_fit = None;
     let mut message_n = 0;
-    if framed {
+    // The conversation on its own shows the whole of it above, so the box takes no message of its own.
+    if framed && !s.chat_whole {
         let w = who.as_ref().unwrap();
         let mut spare = rows_n as i64 - input.len() as i64 - 1 - said.len() as i64 - head_n as i64 - 1 - s.jobs.len().min(1) as i64 - 2;
         let mut draft_rows = input.len() as i64 - 2;
@@ -159,6 +161,7 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
     let top: Vec<Inked> = if s.menu.is_some() { super::menu::menu_lines(s, t, width, h) }
         else if let (Some(a), true) = (&auto, s.auto_open) { super::panel::auto::auto_full(s, t, a, width, h) }
         else if crate::board::update::edit::mine_open(s) { super::panel::page::mine_full(s, t, width, h) }
+        else if s.chat_whole { super::guard::part(|| super::talk_panel::conversation(s, who.as_ref(), width, h)).unwrap_or_else(|why| vec![failed(&format!("The conversation could not be shown: {why}"), width)]) }
         else if let (true, None, Some(c)) = (s.full, &r, crate::board::update::pilot::selected(s)) { super::panel::coord::coord_full(s, &c, width, h) }
         else if s.full && (r.is_some() || shown_job.is_some()) { let x = r.clone().or(shown_job.clone()).unwrap(); super::guard::part(|| super::panel::full_panel(s, t, &x, width, h)).unwrap_or_else(|why| vec![Inked::new(), failed(&format!("The task details could not be shown: {why}"), width)]) }
         else if width >= WIDE && s.side {
@@ -170,8 +173,12 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
                 .unwrap_or_else(|why| std::iter::once(Inked::new()).chain(Inked::of(format!("✗ The task panel could not be shown: {why}"), Ink::Red).wrap(pane_w.saturating_sub(2).max(10)).into_iter().map(|l| Inked::plain(" ").add(l))).collect());
             (0..h).map(|i| left.get(i).cloned().unwrap_or_default().fit(list_w).add(Inked::plain(" ")).add(Inked::of("│", Ink::Dim)).add(Inked::plain(" ").add(right.get(i).cloned().unwrap_or_default()).fit(pane_w + 1).on(Ink::Sidebar))).collect()
         } else { list_part(s, t, width, h, width, held.len()) };
+    // The last line says what the board holds, or what the keys do: which of the two is your own setting.
     match super::guard::part(|| hints(s, r.as_ref(), who.as_ref())) {
-        Ok((hint_list, chat_key)) => { s.chat_key_shown = chat_key.is_some(); if hint_n > 0 { bottom.push(hint_line(hint_list, chat_key.as_ref(), width)); } }
+        Ok((hint_list, chat_key)) => {
+            s.chat_key_shown = chat_key.is_some();
+            if hint_n > 0 { bottom.push(if crate::board::status_line::is_data() { super::status::status_line(s, width) } else { hint_line(hint_list, chat_key.as_ref(), width) }); }
+        }
         Err(why) => bottom.push(failed(&format!("The hints could not be shown: {why}"), width)),
     }
     let mut out = held.clone();

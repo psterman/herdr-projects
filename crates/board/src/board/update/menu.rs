@@ -44,6 +44,7 @@ pub fn label(s: &State, k: K, r: Option<&Obj>) -> String {
         K::ChatMessage => format!("{} the chat's latest message", if s.chat_open { "hide" } else { "show" }),
         K::ChatScrollUp => "scroll the chat's message up".into(),
         K::ChatScrollDown => "scroll the chat's message down".into(),
+        K::ChatWhole => if s.chat_whole { "back to the list".into() } else { "show the conversation on its own".into() },
         K::Side => format!("{} the side panel: this task, beside the list", if s.side { "hide" } else { "show" }),
         K::Panel => if s.full { "back to the list".into() } else { "show the whole task, full screen".into() },
         K::ArchiveView => format!("{} the archive", if s.archive_view { "hide" } else { "show" }),

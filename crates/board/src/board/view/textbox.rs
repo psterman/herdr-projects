@@ -48,6 +48,15 @@ pub fn box_lines(s: &mut State, width: usize, max_rows: usize, r: Option<&Obj>) 
     if lines.len() > 1 { lines[1] = label.clone().add(Inked::plain(" ")).add(if focused { Inked::plain(first).inv() } else { Inked::of(first, Ink::Muted) }).add(Inked::of(rest, Ink::Muted)); }
     (lines, if focused { Some((1, label.width() + 1)) } else { None })
 }
+/// The line you type on, with nothing around it: no frame, no rules, no title. The conversation on its own has this
+/// line under it and nothing else.
+pub fn bare_line(s: &mut State, width: usize, r: Option<&Obj>) -> (Vec<Inked>, Option<(usize, usize)>) {
+    let (mut lines, cursor) = box_lines(s, width, 1, r);
+    // The box's rules go: only the line you type on is left.
+    lines.drain(..1);
+    lines.pop();
+    (lines, cursor.map(|(l, c)| (l.saturating_sub(1), c)))
+}
 /// The text box with the chat open: one rounded box around the latest message, a blank line and the line you type on.
 /// The cells left and right of the text inside the box: two, one in a narrow one.
 fn pad(width: usize) -> usize { if width >= 30 { 2 } else { 1 } }

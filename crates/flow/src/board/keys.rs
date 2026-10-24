@@ -19,7 +19,7 @@ use std::cell::Cell;
 /// The groups, in the order the ? menu and docs/keys.md show them.
 pub const GROUPS: [(&str, &str); 3] = [("plain", "plain keys"), ("ctrl", "ctrl: does something"), ("alt", "alt: only shows or hides")];
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-pub enum K { Up, Down, Fold, Unfold, Open, PageUp, PageDown, Filter, Pilot, Enter, Newline, Talk, Delegate, Back, Menu, SayYes, SayNo, Yes, SendBack, NextAttempt, Stop, Archive, Pin, OpenLink, Settings, PutBack, Undo, Find, Free, Close, Call, ChatMessage, ChatScrollUp, ChatScrollDown, Side, Panel, ArchiveView, ByRepo, AllDone, Scope }
+pub enum K { Up, Down, Fold, Unfold, Open, PageUp, PageDown, Filter, Pilot, Enter, Newline, Talk, Delegate, Back, Menu, SayYes, SayNo, Yes, SendBack, NextAttempt, Stop, Archive, Pin, OpenLink, Settings, PutBack, Undo, Find, Free, Close, Call, ChatMessage, ChatScrollUp, ChatScrollDown, ChatWhole, Side, Panel, ArchiveView, ByRepo, AllDone, Scope }
 pub struct Key {
     pub id: K, pub name: &'static str, pub keys: &'static [&'static str], pub raw: &'static [&'static str], pub show: Option<&'static str>, pub gap: Option<&'static str>,
     pub group: Option<&'static str>, pub with: Option<&'static str>, pub fixed: bool, pub draft: bool, pub web: Option<&'static str>, pub help: Option<&'static str>,
@@ -92,6 +92,8 @@ pub static KEYS: &[Key] = &[
         doc: Some("more of a chat message that is longer than its box: {chatScrollUp} scrolls it up, {chatScrollDown} down, half a box at a time, also while you type. Up opens the box to the conversation before the newest message, each press further up; it stays open, whatever comes meanwhile, until {chatScrollDown} at its end goes back to the newest message ({chatMessage} hides and shows the whole chat; talking to another starts it at the newest too). The box says where there is more, and names the key (`alt+k more ↑`, `alt+j more ↓`). The mouse wheel does the same with the pointer over the chat ([mouse.md](mouse.md))") },
     Key { id: K::ChatScrollDown, name: "chatScrollDown", keys: &["alt+j"], raw: &[], show: None, gap: None, group: Some("alt"), with: Some("chatScrollUp"), fixed: false, draft: true, web: None, help: None, hint: None,
         doc: None },
+    Key { id: K::ChatWhole, name: "chatWhole", keys: &["alt+w"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: None, help: None, hint: None,
+        doc: Some("the conversation on its own: the pane shows what the agent you talk to has said and what it is doing, as far back as it goes, instead of the list of tasks. Nothing is around it: the line you type on is under it, and the line under that still says what the board holds. Up and down scroll it, a page up and a page down scroll a page. Press it again to go back to the list") },
     Key { id: K::Side, name: "side", keys: &["alt+p"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: None, help: None, hint: None,
         doc: Some("the side panel: the selected task, automation or coordinator (its row: its chat, and its autopilot while that is on), beside the list") },
     Key { id: K::Panel, name: "panel", keys: &["alt+t"], raw: &[], show: None, gap: None, group: Some("alt"), with: None, fixed: false, draft: false, web: Some("Open the task"), help: None, hint: None,

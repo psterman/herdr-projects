@@ -26,3 +26,5 @@ pub fn pause(ms: u64) {
 pub fn meanwhile(f: impl FnMut() + 'static) { MEANWHILE.with(|m| *m.borrow_mut() = Some(Box::new(f))); }
 /// A time as JavaScript's toISOString writes it, for log lines.
 pub fn iso(ms: i64) -> String { chrono::DateTime::from_timestamp_millis(ms).map(|d| d.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string()).unwrap_or_default() }
+/// The time of day where it is: "15:04", in the machine's own timezone.
+pub fn hm(ms: i64) -> String { chrono::DateTime::from_timestamp_millis(ms).map(|d| d.with_timezone(&chrono::Local).format("%H:%M").to_string()).unwrap_or_default() }

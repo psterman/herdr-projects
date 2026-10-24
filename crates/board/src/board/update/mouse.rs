@@ -14,7 +14,7 @@ pub fn wheel(s: &mut State, y: usize, by: i64, _fx: &mut Vec<Effect>) {
     let d = if by < 0 { -1 } else { 1 };
     if let Some((from, to)) = s.chat_rows { if y >= from && y < to { super::chat::scroll(s, by * WHEEL); return; } }
     if s.menu.is_some() { let n = super::menu::items(s).len(); return super::menu::step(s, d, n); }
-    if s.full || s.auto_open { return super::actions::scroll_panel(s, by * WHEEL); }
+    if s.full || s.auto_open || s.chat_whole { return super::actions::scroll_panel(s, by * WHEEL); }
     if locked(s) { s.top_free = true; s.top = (s.top as i64 + d * WHEEL).max(0) as usize; return; }
     s.stick.clear();
     super::list::step(s, d);

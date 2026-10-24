@@ -42,9 +42,11 @@ pub mod watcher;
 /// What the board's screen has that the flow uses too: the keys (a message names a key) and the theme (the review
 /// page's colours). sw-board's `board` module passes them on, so they are `crate::board::keys` everywhere.
 pub mod board {
+    pub mod chat_view;
     pub mod key_style;
     pub mod keys;
     pub mod remap;
+    pub mod status_line;
     pub mod theme;
 }
 /// What of the web UI the flow and the board's screen use: where the web UI is, its PCs, its link, and the

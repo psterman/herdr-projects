@@ -794,6 +794,29 @@ shortcut fires in the middle of a draft.
   `Space` goes back to it; a task's agent: select that task, and `Space` if you talk to the Coordinator), and the words
   stay put away until you are there.
 
+### The conversation on its own
+
+**The pane can be the conversation and nothing else.** `herdr-projects set board.view chat` makes the board open that
+way. The list of tasks gives way, and so does everything that was around the chat: no head line, no box, no rule, no
+empty words. What is left is what was said, and the line you type on under it:
+
+```
+  ↑ 13 more
+  The check fails on main too: it is not this task's change.
+  I filed proj/7 for it and put an agent on it.
+
+❯ Send message to vm-str's coordinator
+  hermes · MiniMax-M3.1-Flash · idle · 0 tasks · 16:09
+```
+
+- **The whole conversation is there**, as far back as the pane goes, newest at the bottom. `↑` and `↓` scroll it, a page
+  up and a page down scroll a page, and the mouse wheel does the same over it.
+- **What is out of view is said in one greyed line**, above or under (`↑ 13 more`), and nothing else is around it.
+- **The line you type on is the only box**: no frame, no title, no rules. While it is empty it says in grey who gets
+  your message, as it always does.
+- **The line under it still says what the board holds** (the `board.statusLine` setting), and the `?` menu has every key.
+- **The list is one key away**: `Alt+W` shows the conversation on its own, and again puts the list back.
+
 ## Going into an agent
 
 **Going into an agent never ends the board.** `Alt+O` on a task moves Herdr to that agent's real pane:

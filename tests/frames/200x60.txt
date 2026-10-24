@@ -213,6 +213,7 @@
    alt+c        hide the chat's latest message
    alt+k        scroll the chat's message up
    alt+j        scroll the chat's message down
+   alt+w        show the conversation on its own
    alt+p        show the side panel: this task, beside the list
    alt+t        show the whole task, full screen
    alt+a        show the archive
@@ -235,8 +236,7 @@
    ⟳            an automation (dimmed while it is off; the word after it says on or off)
    65% 2m left  how far it is, and the time left; the time after it is how long it has worked, or how long ago it stopped
    R#2          the review it is on or last had, coloured by where it stands: passed, failed, the reviewer working
-   PR#16        its pull request: green when its checks pass, red when they fail
- ↓ 3 more
+ ↓ 4 more
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ❯ Add a task

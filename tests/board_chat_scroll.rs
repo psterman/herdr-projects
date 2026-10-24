@@ -237,3 +237,47 @@ fn a_tall_draft_in_a_small_window_never_takes_the_answer_away_it_gives_rows_back
         b.key(&["alt+k"; 20]);
     }
 }
+
+#[test]
+fn the_whole_conversation_can_take_the_pane_on_its_own_and_up_and_down_scroll_it() {
+    let mut b = B::new(30, 4);
+    // The list of tasks is there to begin with.
+    assert!(b.screen(120).iter().any(|l| l.contains("Task number 1")), "the list is there");
+    // The conversation, on its own, whole: the list gives way to it.
+    b.key(&["alt+w"]);
+    assert!(b.b.s.chat_whole, "the conversation is on its own");
+    let lines = b.screen(120);
+    assert!(lines.iter().any(|l| l.contains("Line 40 of the answer.")), "all of it is there: {lines:?}");
+    assert!(!lines.iter().any(|l| l.contains("Task number 1")), "the list gives way: {lines:?}");
+    // Up scrolls it, down comes back.
+    let was = b.b.s.panel_top;
+    b.key(&["up"]);
+    assert!(b.b.s.panel_top < was, "up scrolls it: {was} -> {}", b.b.s.panel_top);
+    b.key(&["down"]);
+    assert_eq!(b.b.s.panel_top, was, "down comes back to the newest");
+    // And the list is there again.
+    b.key(&["alt+w"]);
+    assert!(!b.b.s.chat_whole);
+    assert!(b.screen(120).iter().any(|l| l.contains("Task number 1")), "the list is back");
+}
+
+#[test]
+fn the_conversation_on_its_own_has_nothing_around_it_but_the_line_you_type_on() {
+    let mut b = B::new(30, 4);
+    b.key(&["alt+w"]);
+    let lines = b.screen(120);
+    // The list gives way, and with it its header, its filter row and its empty words.
+    assert!(!lines.iter().any(|l| l.contains("Task number 1")), "the list gives way: {lines:?}");
+    assert!(!lines.iter().any(|l| l.contains("Nothing here yet")), "no empty words: {lines:?}");
+    assert!(!lines.iter().any(|l| l.contains("All ") && l.contains("Coords")), "no filter row: {lines:?}");
+    // The box gives way too: no frame, no rule, no title, no words of its own.
+    assert!(!lines.iter().any(|l| l.contains('╭') || l.contains('╰')), "no frame: {lines:?}");
+    assert!(!lines.iter().any(|l| l.starts_with('─')), "no rule: {lines:?}");
+    assert!(!lines.iter().any(|l| l.contains("Machine coordinator")), "no title: {lines:?}");
+    // What was said is there, and the line you type on is under it.
+    assert!(lines.iter().any(|l| l.contains("Line 40 of the answer.")), "the words are there: {lines:?}");
+    let at = lines.iter().position(|l| l.contains('❯')).expect("the line you type on");
+    assert!(lines[..at].iter().any(|l| l.contains("Line 40 of the answer.")), "the words are above it: {lines:?}");
+    // What is out of view is said in one greyed line, above or under.
+    assert!(lines.iter().any(|l| l.contains("↑") && l.contains("more")), "it says there is more above: {lines:?}");
+}

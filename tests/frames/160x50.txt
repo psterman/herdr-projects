@@ -183,6 +183,7 @@
    alt+c        hide the chat's latest message
    alt+k        scroll the chat's message up
    alt+j        scroll the chat's message down
+   alt+w        show the conversation on its own
    alt+p        show the side panel: this task, beside the list
    alt+t        show the whole task, full screen
    alt+a        show the archive
@@ -195,8 +196,7 @@
    ◑            its reviewer works
    ◇            the board's own step (it checks, waits for GitHub, merges)
    ◷            queued: for a free slot (Q#1 next) or after other tasks
-   ?            asks you
- ↓ 13 more
+ ↓ 14 more
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ❯ Add a task

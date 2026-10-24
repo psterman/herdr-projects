@@ -46,6 +46,15 @@ pub fn hints(s: &State, r: Option<&Obj>, who: Option<&Who>) -> (Vec<Hint>, Optio
         return (if !e.typing.is_empty() { vec![plain(enter, "save this value"), plain(esc, "leave it as it is")] } else { vec![plain(pair(K::Up), "move"), plain(enter, "change"), plain(name(K::PutBack), "put back"), plain(esc, if e.whose.mine() { "back to the list" } else { "back to the task" })] }, chat_key);
     }
     if s.mode == Mode::Find { return (vec![plain(enter, "keep the filter"), plain(esc, "cancel")], chat_key); }
+    // The conversation on its own: the keys that are about it, and nothing about the list behind it.
+    if s.chat_whole {
+        let mut v = vec![];
+        if !s.value().is_empty() { v.push(Hint { key: enter.clone(), words: "send it".into(), ..Default::default() }); }
+        v.push(Hint { key: arrows.clone(), words: "scroll the conversation".into(), stays: true, ..Default::default() });
+        v.push(Hint { key: name(K::ChatWhole), words: "back to the list".into(), stays: true, ..Default::default() });
+        v.push(more);
+        return (v, None);
+    }
     let agent_on = r.map(is_agent).unwrap_or(false);
     // While you type: what the keys do with your words, and who gets them. A reply names its task by its tag: the
     // words are locked to it while the list may be scrolled to others, and the box's edge names no one.

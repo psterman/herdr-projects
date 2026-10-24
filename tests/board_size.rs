@@ -84,10 +84,11 @@ fn a_terminal_held_at_another_size_the_board_draws_inside_what_is_shown_and_take
     assert_eq!(lines.len(), 58); assert!(has(&lines[57], r"^[ ▌] \S.* · ")); assert!(lines[56].contains("Another viewer holds this terminal at 435×58; herdr shows it at 184×78"));
     for l in &lines { assert!(sw::text::width(l) <= 183); }
     assert!(has(&pin(&lines), r"55% 12m left {2}PR#3 {2}6m$"));
-    // No key takes the terminal back: alt+w, the key that once did, disconnects nobody, on an empty text box or in a draft.
-    let alt_w = |s: &mut Board| update(&mut s.s, Event::Key(Press::chord("alt+w"))).into_iter().any(|e| matches!(e, Effect::Take { .. }));
-    assert!(!alt_w(&mut s)); assert_eq!(s.s.value(), "");
-    s.typed("half a draft"); assert!(!alt_w(&mut s)); assert_eq!(s.s.value(), "half a draft");
+    // No key takes the terminal back: a chord that is not one of the board's disconnects nobody, on an empty text box
+    // or in a draft.
+    let other = |s: &mut Board| update(&mut s.s, Event::Key(Press::chord("alt+g"))).into_iter().any(|e| matches!(e, Effect::Take { .. }));
+    assert!(!other(&mut s)); assert_eq!(s.s.value(), "");
+    s.typed("half a draft"); assert!(!other(&mut s)); assert_eq!(s.s.value(), "half a draft");
     s.s.input.set_text("");
     assert!(s.screen(435).join("\n").contains("Another viewer holds this terminal"));
     // The other viewer went away: herdr and the terminal agree again, and the note is gone.
