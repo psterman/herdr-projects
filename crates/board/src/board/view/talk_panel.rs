@@ -17,7 +17,7 @@ pub fn conversation(s: &mut State, who: Option<&Who>, width: usize, h: usize) ->
     }
     // Your words are as bright as you type them, theirs grey, and the screen of a program that cannot be read is fainter
     // still: in the open, the words stand out from the program they came from.
-    let paint = |by: bool, l: Inked, p: &Part| if by { l.recolor(Ink::Muted) } else if !p.tone.is_empty() { l.recolor(crate::board::update::beat::ink_of(&p.tone)) } else if p.mine || p.by == "You" { l.recolor(Ink::Plain) } else { l.recolor(Ink::Soft) };
+    let paint = |by: bool, l: Inked, p: &Part| if by { l.recolor(Ink::Muted) } else if !p.tone.is_empty() { l.recolor(crate::board::update::beat::ink_of(&p.tone)) } else if p.mine || p.by == "You" { l.recolor(Ink::Plain) } else if p.raw { l.recolor(Ink::Muted) } else { l.recolor(Ink::Soft) };
     let room = width.saturating_sub(2).max(1);
     let (lines, _starts) = super::chat_text::part_lines(&w.parts, room, &paint);
     let lines: Vec<Inked> = lines.into_iter().map(|l| Inked::plain("  ").add(l)).collect();

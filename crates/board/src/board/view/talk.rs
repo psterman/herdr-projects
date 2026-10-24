@@ -85,7 +85,11 @@ pub fn coord_talk(v: &crate::coordinator::look::Look, screen: &str) -> (Vec<Part
         else if m.you { Part { by: "You".into(), text: sent(&m.text), whole: m.text.clone(), sent: true, ..Default::default() } } else { Part { by: "Coordinator".into(), text: m.text.clone(), ..Default::default() } }).collect();
     if !parts.iter().any(|p| !p.sent) && !v.said.is_empty() { parts.push(Part { by: "Coordinator".into(), text: v.said.clone(), ..Default::default() }); }
     // A program whose conversation cannot be read: the words on its screen.
-    if !v.readable && v.status.is_some() { let raw = !screen.is_empty(); return (if raw { vec![Part { by: "Coordinator, on its screen now".into(), text: screen.into(), raw: true, ..Default::default() }] } else { vec![] }, raw, false, false); }
+    if !v.readable && v.status.is_some() {
+        let text = crate::agents::screen_text::screen_text(screen);
+        let raw = !text.is_empty();
+        return (if raw { vec![Part { by: "Coordinator, on its screen now".into(), text, raw: true, ..Default::default() }] } else { vec![] }, raw, false, false);
+    }
     if v.state == "blocked" { parts.push(Part { note: "dialog".into(), tone: "yellow".into(), text: format!("The Coordinator shows a dialog on its screen that waits for your answer: it is in herdr's tab \"{}\".", crate::coordinator::place::COORDINATOR_TAB), ..Default::default() }); return (parts, false, false, true); }
     (with_mine(parts, &v.sent), false, !v.sent.is_empty(), false)
 }

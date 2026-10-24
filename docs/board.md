@@ -662,6 +662,11 @@ screen or logo.
 - **Herdr's other programs**, whose conversation the board does not read ([agents](agents.md)), show the words on their
   screen instead, under `Agent, on its screen now:`, with what is drawn there (rules, boxes, a logo, a bar) left out by
   its shape.
+  - **The words of a screen are put back together.** A program the board cannot read writes on a screen of its own
+    width, and its lines are cut at that edge, in the middle of a word now and then. The board reads them as the
+    paragraphs they were: `qu|estion` is `question`, a line that ended at a space keeps its space, and a line that ends
+    a sentence stands as it is. What the program drew for itself (a bar of status, a rule, the line it types on) stands
+    as it is too, and the frame around its words is left out.
 - Markdown reads as text: a list item's next lines stand under its words, code keeps its lines, and the marks of a
   headline, of bold and of a code block are left out.
 - **A command you typed to it** (`/clear`, `/compact`, `/model` …) shows as you typed it, and then in plain words what
@@ -815,6 +820,10 @@ empty words. What is left is what was said, and the line you type on under it:
 - **The line you type on is the only box**: no frame, no title, no rules. While it is empty it says in grey who gets
   your message, as it always does.
 - **The line under it still says what the board holds** (the `board.statusLine` setting), and the `?` menu has every key.
+- **Three kinds of words, three shades**: what you wrote is as bright as the line you type on, what the one you talk to
+  said is grey, and the words of a screen the board could not read from a conversation are fainter still. The web board
+  draws them in the same three: your words in a card of their own, their words dimmed, and a screen in a smaller type
+  ([the web board's chat](web-chat.md)).
 - **The list is one key away**: `Alt+W` shows the conversation on its own, and again puts the list back.
 
 ## Going into an agent

@@ -24,15 +24,15 @@ fn chips(l: Inked) -> Inked {
     if let Some(r) = l.role_of() { out = out.role(r); }
     out
 }
-/// One text, wrapped to `width`. `raw`: a screen's lines, kept as they are.
+/// One text, wrapped to `width`. `raw`: a screen's words, put back into the lines they were cut into.
 pub fn prose_lines(text: &str, width: usize, raw: bool) -> Vec<Inked> {
+    if raw { return super::unfold::lines(text, width); }
     let mut out = vec![];
     let mut code = false;
     let bold = crate::re!(r"\*\*([^*\n]+)\*\*");
     let head = crate::re!(r"^(\s*)#{1,6}\s+");
     let lead_re = crate::re!(r"^\s*(?:[-*+•]|\d+[.)])\s+|^\s*>\s?|^\s+");
     for line in text.split('\n') {
-        if raw { out.extend(wrap(&clean(line), width, "", "")); continue; }
         let t = line.trim_start();
         if t.starts_with("```") || t.starts_with("~~~") { code = !code; continue; }
         if code { out.extend(wrap(&clean(&line.replace('\t', "  ")), width, "  ", "  ")); continue; }

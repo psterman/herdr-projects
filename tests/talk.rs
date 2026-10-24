@@ -92,6 +92,40 @@ fn a_screens_words_leave_out_what_is_drawn_and_markdown_reads_as_text() {
     assert_eq!(lines, vec!["Result", "Pass. All of it.", "- a point that is long", "  enough to wrap", "  const a = 1;", "1. first"]);
 }
 
+#[test]
+fn a_screen_cut_at_its_own_width_is_put_back_into_the_lines_it_was_one() {
+    // What a program wrote on a screen of its own width: its words are cut in two at the edge.
+    let screen = ["╭─ ☤ Hermes ────────────────────────────────╮",
+        "Actually — maybe the user is testing. The most sensible response: ask what \"1\" refers",
+        "to, briefly. But maybe I should consider whether there was a numbered list of options somewhere. My",
+        " last reply had no numbered options. So \"1\" is likely just a stray input or a poke to test responsiv",
+        "eness.",
+        "",
+        "Let me check if there's any pending question from the board — maybe an agent asked a qu",
+        "estion, or the board has notifications. Let me check `board list` — no tasks. So not",
+        "hing pending.",
+        "",
+        "Wait — actually, maybe I should reconsider: could \"1\" refer to picking an option f",
+        "rom a previous board interaction? Let me check the board's other coordinator state or the herdr tran",
+        "script. Let me look for any pending \"pick\" state: state.json \"pick\": null.",
+        "",
+        "「1」我看不出指向什么——板上没有任务。",
+        "☤ MiniMax-M3.1-Flash │ ~42.9K/1M │ ~4%",
+        "❯ Set a reminder or schedule a recurring task"].join("\n");
+    let text = sw::board::view::unfold::prose(&screen_text(&screen));
+    assert!(text.contains("ask what \"1\" refers to, briefly"), "a break at a space keeps its space: {text}");
+    assert!(text.contains("My last reply had no numbered options"), "and the one that moved it too: {text}");
+    assert!(text.contains("to test responsiveness"), "the word cut in two is whole: {text}");
+    assert!(text.contains("an agent asked a question, or the board has notifications"), "and the next one: {text}");
+    assert!(text.contains("So nothing pending."), "the sentence stands whole: {text}");
+    assert!(text.contains("picking an option from a previous board interaction"), "and this one: {text}");
+    assert!(text.contains("the herdr transcript"), "the last word of the screen too: {text}");
+    assert!(text.contains("「1」我看不出指向什么——板上没有任务。"), "the words of another tongue stay: {text}");
+    assert!(text.contains("MiniMax-M3.1-Flash"), "the bar of status stands: {text}");
+    assert!(text.contains("Set a reminder"), "and the box of the program: {text}");
+    assert!(!text.contains("Hermes"), "the frame it drew around its words is left out: {text}");
+}
+
 use crate::common;
 use common::*;
 use sw::board::keys::key_name;
