@@ -31,16 +31,16 @@ fn a_moved_key_answers_to_your_chord_only_and_the_board_names_it_so() {
     assert!(is(&Press::chord("ctrl+g"), K::ChatMessage) && !is(&Press::chord("alt+c"), K::ChatMessage));
     let mut s = open(&w.root, 34); s.s.side = false;
     s.s.sel = id.clone(); s.load(); s.press(&["space"]);
-    assert!(s.chat(120).hints.ends_with("ctrl+g hide the latest message · space back"), "{}", s.chat(120).hints);
+    assert!(s.chat(120).hints.ends_with("ctrl+g hide the chat's message · space back"), "{}", s.chat(120).hints);
     s.press(&["alt+c"]); assert!(s.s.chat_open, "the old chord does nothing now");
     s.press(&["ctrl+g"]);
     let c = s.chat(120);
     assert!(!s.s.chat_open); assert_eq!(c.boxed.iter().rev().find(|x| !x.trim().is_empty()).map(|x| x.trim().to_string()), Some("❯ Send message to the agent".to_string()), "{:?}", c.boxed);
-    assert!(c.hints.ends_with("ctrl+g show the latest message · space back"), "{}", c.hints);
+    assert!(c.hints.ends_with("ctrl+g show the chat's message · space back"), "{}", c.hints);
     s.press(&["ctrl+g"]); assert!(s.s.chat_open);
     s.rows = 60; s.press(&["?"]);
     let t = s.text();
-    assert!(regex::Regex::new(r"ctrl\+g +hide the chat's latest message").unwrap().is_match(&t), "{t}");
+    assert!(regex::Regex::new(r"ctrl\+g +hide the chat's message").unwrap().is_match(&t), "{t}");
     assert!(!t.contains("alt+c"), "{t}");
     // Taken away, the key is its own again.
     settings_command("unset", &["unset".into(), "board.keys".into()], &you(), None).unwrap();
@@ -131,13 +131,13 @@ fn mac_writes_opt_where_pc_writes_alt_and_the_keys_stay_the_same() {
     assert_eq!(sw::board::remap::as_built(|| key_name("side")), "alt+p", "docs/keys.md keeps the PC names");
     let mut s = open(&w.root, 34); s.s.side = false;
     s.s.sel = id.clone(); s.load(); s.press(&["space"]);
-    assert!(s.chat(120).hints.ends_with("opt+c hide the latest message · space back"), "{}", s.chat(120).hints);
+    assert!(s.chat(120).hints.ends_with("opt+c hide the chat's message · space back"), "{}", s.chat(120).hints);
     s.press(&["alt+c"]); assert!(!s.s.chat_open, "the Option key sends alt: it is the same key");
     s.press(&["alt+c"]);
     s.rows = 60; s.press(&["?"]);
     let t = s.text();
     assert!(t.contains("opt: only shows or hides") && t.contains("ctrl: does something"), "{t}");
-    assert!(regex::Regex::new(r"opt\+c +hide the chat's latest message").unwrap().is_match(&t), "{t}");
+    assert!(regex::Regex::new(r"opt\+c +hide the chat's message").unwrap().is_match(&t), "{t}");
     assert!(!t.contains("alt"), "{t}");
     // Your own chord is written in your style too.
     set_in("board.keys", "side=alt+y").unwrap();

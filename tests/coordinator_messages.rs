@@ -122,10 +122,10 @@ fn what_you_say_is_never_lost_a_dialog_on_its_screen_holds_it_a_failed_start_say
     // alt+c hides that too, as the chat's line says, and so does esc with nothing else to step back from.
     s.s.chat_open = false; s.s.input.set_text(""); s.s.reply = false; s.s.full = false; s.s.filter = String::new(); s.s.msg = String::new();
     let chat_key = regex::escape(&key_name("chatMessage"));
-    assert!(has(&s.text(), &format!("{chat_key} hide the latest message")), "{}", s.text());
+    assert!(has(&s.text(), &format!("{chat_key} hide the chat's message")), "{}", s.text());
     s.press(&["esc"]); assert!(s.s.ask.is_none() && !s.closed && s.s.closing.is_none());
     assert!(!s.text().contains("It could not be started:"));
-    assert!(has(&s.text(), &format!(r"\n[ ▌]✗ [▾▸] [^\n]*\n(?:[^\n]*\n)*╭─[^\n]*╮\n(?:│ +│\n)?│ +❯ [^\n]*\n(?:│ +│\n)?╰─+╯\n[^\n]*{chat_key} show the latest message")), "{}", s.text());
+    assert!(has(&s.text(), &format!(r"\n[ ▌]✗ [▾▸] [^\n]*\n(?:[^\n]*\n)*╭─[^\n]*╮\n(?:│ +│\n)?│ +❯ [^\n]*\n(?:│ +│\n)?╰─+╯\n[^\n]*{chat_key} show the chat's message")), "{}", s.text());
     s.load(); assert!(!s.text().contains("It could not be started:"), "the same error stays hidden");
     s.press(&["esc"]); s.s.closing = None;
     // alt+c shows it again and hides it again, shown by the setting or not.

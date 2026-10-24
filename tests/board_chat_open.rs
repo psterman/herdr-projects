@@ -37,9 +37,9 @@ fn an_opened_chat_stays_open_on_what_you_read_while_the_coordinator_works_and_sa
     for i in 1..=5 { w.add(&format!("Task number {i}")); }
     let mut b = open(&w.root, 34); b.s.side = false;
     read(&mut b, 1, 12, "idle");
-    // Closed, the box holds the newest alone: the answer, your words above it.
+    // Closed, the box holds the conversation's end: the last messages, as many as fit.
     let l = shown(&mut b);
-    assert!(has(&l, "Message 12, line 4.") && !has(&l, "Message 11,"), "{l:?}");
+    assert!(has(&l, "Message 12, line 4.") && has(&l, "Message 9, line 4.") && !has(&l, "Message 8,"), "{l:?}");
     // Up, and up again: the conversation, from an older message.
     for _ in 0..3 { b.press(&["alt+k"]); shown(&mut b); }
     let reading = shown(&mut b);
@@ -60,8 +60,8 @@ fn an_opened_chat_stays_open_on_what_you_read_while_the_coordinator_works_and_sa
     assert!(has(&l, "Message 15, line 4.") && has(&l, "Message 13, line 1."), "the new message under the ones before it: {l:?}");
     read(&mut b, 5, 16, "idle"); tick(&mut b); let l = shown(&mut b);
     assert!(has(&l, "Message 16, line 4.") && has(&l, "Message 14, line 1."), "{l:?}");
-    // Down once more from its end closes it to the newest.
-    b.press(&["alt+j"]); let l = shown(&mut b); assert!(!has(&l, "Message 14,"), "closed: {l:?}");
+    // Down once more from its end closes it to the conversation's end.
+    b.press(&["alt+j"]); let l = shown(&mut b); assert!(has(&l, "Message 14, line 4.") && !has(&l, "Message 11, line 1."), "closed to the conversation's end: {l:?}");
 }
 
 #[test]
@@ -79,7 +79,7 @@ fn hiding_the_chat_or_talking_to_another_closes_an_opened_chat_nothing_else_does
     let start = shown(&mut b); assert!(has(&start, "Message 1, line 1."), "{start:?}");
     b.press(&["alt+k", "alt+k"]); assert_eq!(shown(&mut b), start, "up at its start stays open there");
     while b.s.chat_fit.as_ref().unwrap().below > 0 { b.press(&["alt+j"]); shown(&mut b); n += 1; assert!(n < 40); }
-    assert_ne!(shown(&mut b), closed, "at its end, still open");
+    assert!(b.s.chat_at.as_ref().unwrap().top.is_some(), "at its end, still open");
     b.press(&["alt+j"]); assert_eq!(shown(&mut b), closed);
     // Hidden and shown again (esc hides it, as its own key does): the newest, closed.
     b.press(&["alt+k"]); assert_ne!(shown(&mut b), closed);

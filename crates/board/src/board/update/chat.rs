@@ -1,4 +1,4 @@
-//! The chat at the bottom, from the board's side: showing and hiding the latest message, scrolling one longer than its
+//! The chat at the bottom, from the board's side: showing and hiding the chat's message, scrolling one longer than its
 //! box, and what you just sent to a task's agent or a heading's coordinator, which stands in the box as yours from the
 //! moment you send it until their own conversation has it or they say something new.
 use super::Effect;
@@ -7,7 +7,7 @@ use crate::board::state::{Sent, State};
 use crate::coordinator::look::Look;
 use crate::json::*;
 
-/// The one key for the latest message, both ways. A start that failed says why even while the chat is hidden, so
+/// The one key for the chat's message, both ways. A start that failed says why even while the chat is hidden, so
 /// hiding it also puts that one error away: the same error stays hidden, the next one shows again.
 pub fn toggle(s: &mut State, fx: &mut Vec<Effect>) {
     let always = !s.reply && !s.data.coord.error.is_empty() && s.err_hid != s.data.coord.error;
@@ -79,8 +79,8 @@ pub fn sync_coord(s: &mut State, fx: &mut Vec<Effect>) {
     else if s.reply && s.told_reply != unseen && s.msg.is_empty() { s.told_reply = unseen; let who = super::top::top(s).map(|t| crate::board::update::top::sentence(&t.name)).unwrap_or_else(|| "The coordinator".into()); s.flash(format!("{who} replied. {} goes back to it.", crate::board::keys::key_name("talk")), crate::shown::ink::Ink::Muted); }
 }
 /// Scroll the message `by` lines (up when negative). Down again from the end of a conversation that was opened (or
-/// of a message scrolled through) closes it to the newest message alone, from its start. Nothing but what shows
-/// changes: the place is yours now (view/chat_keep.rs).
+/// of a message scrolled through) closes it to the conversation's end, the newest thing said last. Nothing but what
+/// shows changes: the place is yours now (view/chat_keep.rs).
 pub fn scroll(s: &mut State, by: i64) -> bool {
     let (Some(f), Some(at)) = (s.chat_fit.clone(), s.chat_at.as_mut()) else { return false };
     let last = f.total.saturating_sub(f.rows);

@@ -1,5 +1,6 @@
-//! The chat at the bottom: one line that says who you talk to, and their latest message in the box under it. The same
-//! shape for the Coordinator and for a task's agent: a mark, a name, a greyed line on where they stand, the message.
+//! The chat at the bottom: one line that says who you talk to, and the conversation in the box under it: the newest
+//! thing said and the turns above it that fit. The same shape for the Coordinator and for a task's agent: a mark, a
+//! name, a greyed line on where they stand, the message.
 use super::fields::{fields, mark};
 use super::talk::{coord_talk, opens_at, talk, with_mine, Part};
 use crate::board::keys::key_name;
@@ -137,7 +138,7 @@ pub fn chat_lines(c: Option<&Who>, width: usize, tight: bool) -> Vec<Inked> {
     out.extend(c.call.iter().take(if tight { 1 } else { 3 }).map(|l| l.cut(width.max(1))));
     out
 }
-/// Is the box open on the latest message? A start that failed says why, hidden or not.
+/// Is the box open on the chat's message? A start that failed says why, hidden or not.
 pub fn chat_up(s: &State, c: Option<&Who>) -> bool { c.map(|c| s.chat_open || c.always).unwrap_or(false) }
 /// The conversation, wrapped to `width`, on at most `max` lines: each thing said under the line that names who said it.
 pub fn chat_message(s: &mut State, c: Option<&Who>, width: usize, max: usize) -> Vec<Inked> {
@@ -147,25 +148,27 @@ pub fn chat_message(s: &mut State, c: Option<&Who>, width: usize, max: usize) ->
     // its frame takes their colour.
     let paint = |by: bool, l: Inked, p: &Part| if by { l.recolor(Ink::Muted) } else if !p.tone.is_empty() { l.recolor(crate::board::update::beat::ink_of(&p.tone)) } else if p.mine || p.by == "You" { l.recolor(Ink::Plain) } else { l.recolor(Ink::Soft) };
     let (lines, starts) = super::chat_text::part_lines(&c.parts, width.max(1), &paint);
-    // The newest thing said alone, whoever said it: the rest of the conversation is above it.
+    // The newest thing said, whoever said it: the box holds it and the turns above it that fit.
     let latest = starts.get(opens_at(&c.parts)).copied().unwrap_or(0);
     let texts: Vec<String> = lines.iter().map(|l| l.text()).collect();
     let top = chat_window(s, c, &texts, max, latest);
     let rows = s.chat_fit.as_ref().map(|f| f.rows).unwrap_or(0);
     lines.into_iter().skip(top).take(rows).collect()
 }
-/// Which lines of a conversation show: the box opens on the newest thing said (from `latest`) and holds only that; the
-/// first scroll up opens it to the conversation. Only a screen starts at its end. Opened, it stays open for as long as
+/// Which lines of a conversation show: the box holds the newest thing said (from `latest`) and the turns above it that
+/// fit; a newest thing longer than the box takes all of it, and the rest of it is read with the scroll down. The first
+/// scroll up opens it to the conversation above. Only a screen starts at its end. Opened, it stays open for as long as
 /// you talk to the same one, whatever they say meanwhile: on the lines you read, or on the end when you were there
 /// (chat_keep.rs). Down once more from its end, hiding the chat, or talking to another closes it.
 pub fn chat_window(s: &mut State, c: &Who, lines: &[String], max: usize, latest: usize) -> usize {
     let total = lines.len();
     same_chat(s);
     let at = s.chat_at.get_or_insert_with(Default::default);
-    let open = c.raw || at.top.is_some();
-    let rows = max.min(if open { total } else { total - latest }).max(1);
+    let rows = max.min(total).max(1);
     let last = total.saturating_sub(rows);
-    let top = if at.top.is_some() { super::chat_keep::kept(at, lines, last) } else if c.raw { last } else { latest.min(last) };
+    // The newest thing said, from its start; and above it the turns that fit, so that the box is a conversation and not
+    // one message. A newest thing too long for the box takes it all: the rest of it is read with the scroll down.
+    let top = if at.top.is_some() { super::chat_keep::kept(at, lines, last) } else if c.raw { last } else if total - latest <= rows { last } else { latest };
     if at.top.is_some() { at.top = Some(top); at.lines = lines.to_vec(); at.end = top >= last; }
     s.chat_fit = Some(ChatFit { total, rows, top, above: top, below: last - top, latest });
     top

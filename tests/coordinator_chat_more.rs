@@ -29,18 +29,18 @@ fn esc_hides_but_never_shows_the_chat_and_a_task_with_no_agent_is_talked_about_t
     let chat_key = regex::escape(&key_name("chatMessage"));
     w.script(json!({ "coordinator": [{ "said": "Added proj/1." }, { "said": "Delegated proj/1." }, { "said": "Shorter now." }] }));
     let mut s = open(&w.root, 34);
-    s.rows = 60; s.press(&["?"]); assert!(has(&s.text(), &format!("{chat_key} +hide the chat's latest message")), "{}", s.text()); assert!(!has(&s.text(), "restart the Coordinator|new Coordinator|Coordinator's chat")); s.press(&["esc"]); s.rows = 34;
+    s.rows = 60; s.press(&["?"]); assert!(has(&s.text(), &format!("{chat_key} +hide the chat's message")), "{}", s.text()); assert!(!has(&s.text(), "restart the Coordinator|new Coordinator|Coordinator's chat")); s.press(&["esc"]); s.rows = 34;
     s.typed("build a login page"); s.press(&["enter"]); drain(); s.load();
     assert!(s.text().contains("Added proj/1."));
     // Hidden: who you talk to (the box's edge), and the line you type on.
     s.press(&["alt+c"]);
     let top = regex::escape(&crate::board_chat::top_name());
-    assert!(has(&s.text(), &format!(r"\n╭─ [^\n]*╮\n(?:│ +│\n)?│ +❯ Send message to the machine coordinator +│\n(?:│ +│\n)?╰─+╯\n[ ▌] [^\n]*{chat_key} show the latest message · \? all keys *$")), "{}", s.text());
+    assert!(has(&s.text(), &format!(r"\n╭─ [^\n]*╮\n(?:│ +│\n)?│ +❯ Send message to the machine coordinator +│\n(?:│ +│\n)?╰─+╯\n[ ▌] [^\n]*{chat_key} show the chat's message · \? all keys *$")), "{}", s.text());
     // esc never shows the message, and never closes the board: hidden, it stays hidden, and nothing is asked.
     s.press(&["esc"]); assert!(!s.s.chat_open && s.s.ask.is_none() && !s.closed && s.s.closing.is_some());
     assert!(has(&s.text(), &format!(r"\n  {} closes the board · the Coordinator keeps running *$", regex::escape(&key_name("close")))), "{}", s.text()); s.s.closing = None;
     // Shown, with nothing else to step back from, esc hides it as its own key does (the chat's line names only that key).
-    s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1.")); assert!(has(&s.text(), &format!("{chat_key} hide the latest message"))); assert!(!s.text().contains("esc hide"));
+    s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1.")); assert!(has(&s.text(), &format!("{chat_key} hide the chat's message"))); assert!(!s.text().contains("esc hide"));
     s.press(&["esc"]); assert!(!s.s.chat_open && s.s.ask.is_none() && !s.closed && s.s.closing.is_none() && !s.text().contains("Added proj/1."));
     assert_eq!(sw::store::files::read_obj(&sw::store::files::data_dir().join("view.json")).unwrap().s("chat"), "closed");
     s.press(&["alt+c"]); assert!(s.s.chat_open && s.text().contains("Added proj/1."));

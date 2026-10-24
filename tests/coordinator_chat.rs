@@ -1,5 +1,5 @@
 //! One chat for everyone: space on a task talks to its agent, otherwise to the Coordinator; alt+c only shows or hides
-//! the latest message; a draft left from the Coordinator's own pane is sent from the repo it was typed in; and the herdr
+//! the chat's message; a draft left from the Coordinator's own pane is sent from the repo it was typed in; and the herdr
 //! action that goes into the Coordinator's pane from anywhere, starting it first.
 use crate::common;
 use common::board::{open, Board};
@@ -87,7 +87,7 @@ fn one_chat_for_everyone_space_on_a_task_talks_to_its_agent_otherwise_to_the_coo
     assert!(has(&wide(&mut e, 160), r"\n│ +Done\. +│\n│ +│\n│ +❯ Send message to the agent")); e.s.closing = None;
     // The one key hides and shows a task agent's message exactly as it does the Coordinator's.
     e.press(&["alt+c"]); assert!(!e.s.chat_open && e.s.reply);
-    assert!(!has(&wide(&mut e, 160), r"\n│ +Done\. +│\n│ +│\n│ +❯ Send message to the agent")); assert!(has(&wide(&mut e, 160), &format!("{chat_key} show the latest message")));
+    assert!(!has(&wide(&mut e, 160), r"\n│ +Done\. +│\n│ +│\n│ +❯ Send message to the agent")); assert!(has(&wide(&mut e, 160), &format!("{chat_key} show the chat's message")));
     // Hidden, the chat still says who you talk to, and that follows the selection: a message is never sent blind.
     {
         let other = w.add("Somebody else"); e.load();
@@ -98,18 +98,18 @@ fn one_chat_for_everyone_space_on_a_task_talks_to_its_agent_otherwise_to_the_coo
         assert!(has(&wide(&mut e, 160), r"\n╭─ [^\n]*PRJ-\d+  · Agent ─*╮\n(?:│ +│\n)?│ +❯ your message starts an agent on it"), "{}", wide(&mut e, 160));
         for _ in 0..d.abs() { e.press(&[if d > 0 { "up" } else { "down" }]); }
         assert_eq!(e.s.sel, t);
-        assert!(has(&wide(&mut e, 160), &format!(r"\n╭─ [^\n]*PRJ-\d+  · Agent ─*╮\n(?:│ +│\n)?│ +❯ Send message to the agent +│\n(?:│ +│\n)?╰─+╯\n[^\n]*{chat_key} show the latest message")), "{}", wide(&mut e, 160));
+        assert!(has(&wide(&mut e, 160), &format!(r"\n╭─ [^\n]*PRJ-\d+  · Agent ─*╮\n(?:│ +│\n)?│ +❯ Send message to the agent +│\n(?:│ +│\n)?╰─+╯\n[^\n]*{chat_key} show the chat's message")), "{}", wide(&mut e, 160));
         sw::actions::archive::clear(&other).unwrap(); e.load();
     }
     e.press(&["alt+c"]); assert!(e.s.chat_open); assert!(has(&wide(&mut e, 160), r"\n│ +Done\. +│\n│ +│\n│ +❯ Send message to the agent"));
     // space goes back to the top row's coordinator with its message up, and its reply is there.
     e.press(&["space"]); assert!(e.s.chat_open && !e.s.reply); e.load();
-    assert!(has(&e.text(), &format!(r"╭─[^\n]*╮\n(?:│ +│\n)?│ +All done\. +│\n│ +│\n│ +❯ Send message to the machine coordinator")), "{}", e.text()); assert_eq!(look(&so).unseen, "");
+    assert!(has(&e.text(), &format!(r"╭─[^\n]*╮\n(?:│ +│\n)?│ +do something +│\n│ +│\n│ +All done\. +│\n│ +│\n│ +❯ Send message to the machine coordinator")), "{}", e.text()); assert_eq!(look(&so).unseen, "");
     // Nothing changes who the chat names while you type.
     e.typed("half typed");
     w.script(json!({ "coordinator": [{ "said": "Again." }] }));
     send(&w.root, "once more", false, "", &so).unwrap(); drain(); e.load(); e.load();
-    assert!(has(&e.text(), &format!(r"╭─[^\n]*╮\n(?:│ +│\n)?│ +Again\. +│\n│ +│\n│ +❯ half typed")), "{}", e.text());
+    assert!(has(&e.text(), &format!(r"╭─[^\n]*╮\n(?:│ +│\n)?│ +do something +│\n│ +│\n│ +All done\. +│\n│ +│\n│ +once more +│\n│ +│\n│ +Again\. +│\n│ +│\n│ +❯ half typed")), "{}", e.text());
     e.press(&["esc"]);
     unsafe { std::env::remove_var("HERDR_ENV") };
 }

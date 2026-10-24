@@ -64,7 +64,7 @@ fn the_box_talks_to_one_long_lived_coordinator_started_once_with_nothing_held_ba
     s.load();
     for width in [160, 120, 60] {
         let txt = s.screen(width).join("\n");
-        assert!(has(&txt, &format!(r"\n╭─  {host}  [^\n]*╮\n(?:│ +│\n)?│ +Added proj/1\. +│\n│ +│\n│ +❯ Send message to the machine coordinator +│\n(?:│ +│\n)?╰─+╯\n[ ▌] [^\n]*{} \? all keys *$", if width >= 120 { format!("{} hide the latest message ·", regex::escape(&key_name("chatMessage"))) } else { String::new() })), "at {width}: {txt}");
+        assert!(has(&txt, &format!(r"\n╭─  {host}  [^\n]*╮\n(?:│ +│\n)?│ +build a login page +│\n│ +│\n│ +Added proj/1\. +│\n│ +│\n│ +❯ Send message to the machine coordinator +│\n(?:│ +│\n)?╰─+╯\n[ ▌] [^\n]*{} \? all keys *$", if width >= 120 { format!("{} hide the chat's message ·", regex::escape(&key_name("chatMessage"))) } else { String::new() })), "at {width}: {txt}");
         assert!(s.screen(width).iter().all(|l| sw::text::width(l) <= width));
     }
     assert_eq!(sw::coordinator::look::look(&socket).unseen, "", "a reply you can see counts as seen");

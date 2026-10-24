@@ -39,7 +39,7 @@ fn a_yes_says_nothing_under_the_chat_its_row_says_it_and_the_menu_names_every_ke
         assert!(has(&text, &line), "{line}:\n{text}");
     }
     assert!(has(&text, &format!(r"\n ctrl: does something *\n[ ▌]  {} +yes: approve the merge, say yes, retry, take it as it is", k("yes"))), "{text}");
-    assert!(has(&text, &format!(r"\n alt: only shows or hides *\n[ ▌]  {} +hide the chat's latest message", k("chatMessage"))), "{text}");
+    assert!(has(&text, &format!(r"\n alt: only shows or hides *\n[ ▌]  {} +hide the chat's message", k("chatMessage"))), "{text}");
     assert!(has(&text, r"\n plain keys *\n[ ▌]  ↑ ↓ +move between tasks"), "{text}");
     // nothing of the keys that are gone
     assert!(!has(&text, r"Coordinator's chat|restart|new Coordinator|ctrl\+[dog]\b|alt\+[vhrn]\b|delete  "), "{text}");

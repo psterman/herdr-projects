@@ -27,7 +27,7 @@ pub fn hints(s: &State, r: Option<&Obj>, who: Option<&Who>) -> (Vec<Hint>, Optio
     let line = h(hint(K::Newline, None));
     let arrows = { let (u, d) = (name(K::Up), name(K::Down)); if u.chars().count() + d.chars().count() > 2 { format!("{u} {d}") } else { format!("{u}{d}") } };
     let up = who.map(|w| w.said && chat_up(s, Some(w))).unwrap_or(false);
-    let key: Vec<Hint> = if who.map(|w| w.said && !w.text.is_empty() && !s.chat_folded).unwrap_or(false) { vec![hk(K::ChatMessage, &format!("{} the latest message", if up { "hide" } else { "show" }))] } else { vec![] };
+    let key: Vec<Hint> = if who.map(|w| w.said && !w.text.is_empty() && !s.chat_folded).unwrap_or(false) { vec![hk(K::ChatMessage, &format!("{} the chat's message", if up { "hide" } else { "show" }))] } else { vec![] };
     let chat_key = if up { None } else { key.first().cloned() };
     if s.ask.is_some() { return (vec![], chat_key); }
     // After esc at the top (which closes nothing) the line names the key that does. A running Coordinator is no part of

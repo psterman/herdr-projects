@@ -57,7 +57,8 @@ pub fn bare_line(s: &mut State, width: usize, r: Option<&Obj>) -> (Vec<Inked>, O
     lines.pop();
     (lines, cursor.map(|(l, c)| (l.saturating_sub(1), c)))
 }
-/// The text box with the chat open: one rounded box around the latest message, a blank line and the line you type on.
+/// The text box with the chat open: one rounded box around the chat's message (the conversation's end, the newest
+/// thing said last), a blank line and the line you type on.
 /// The cells left and right of the text inside the box: two, one in a narrow one.
 fn pad(width: usize) -> usize { if width >= 30 { 2 } else { 1 } }
 /// The width of the text inside the box.

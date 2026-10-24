@@ -44,7 +44,7 @@ fn under_review_the_web_board_another_machine_and_a_dialog_say_what_the_reviewer
     jsonl(&claude_dir.join("projects").join("x").join("rev-1.jsonl"), &rows);
     let mut s = common::board::open(&w.root, 34); s.s.side = false;
     s.s.sel = id.clone(); s.load(); s.press(&["space"]);
-    assert_eq!(boxed(&mut s)[..2].to_vec(), vec!["Reviewer:", "One fault left: the header is cut."]);
+    assert_eq!(boxed(&mut s)[..8].to_vec(), vec!["Board:", "Work board task proj/1, role: reviewer, round 1.", "", "Reviewer:", "The full check passes. Now the browser.", "", "Reviewer:", "One fault left: the header is cut."]);
     // the web board gets the same parts, and its text box says what a message does now
     let side = sw::webui::model::side::side_of(&mut s.s, &s.theme.clone());
     assert_eq!(side.at("chat").arr("parts").last().unwrap(), &json!({ "by": "Reviewer", "text": "One fault left: the header is cut.", "mine": false, "tone": "", "raw": false, "sent": false }));
@@ -83,7 +83,7 @@ fn a_working_agents_chat_is_its_words_never_its_tool_calls_or_its_screen_where_i
     assert!(t.b("session"), "{t:?}");
     jsonl(&claude_dir.join("projects").join("x").join(format!("{}.jsonl", t.s("session"))), &claude_rows("Work board task proj/1, role: agent.\n\nMake f", &["I am writing **f** now:\n- the file\n- its test"]));
     s.load();
-    let b = boxed(&mut s); assert_eq!(b[..b.len() - 2].to_vec(), vec!["I am writing f now:", "- the file", "- its test"]);
+    let b = boxed(&mut s); assert_eq!(b[..b.len() - 2].to_vec(), vec!["Board:", "Work board task proj/1, role: agent.", "Make f", "", "I am writing f now:", "- the file", "- its test"]);
     assert!(!regex::Regex::new(r"Bash\(|3 passed|Transmuting|bypass permissions|tokens\)").unwrap().is_match(&s.text()), "{}", s.text());
     s.press(&["alt+k"]); assert_eq!(boxed(&mut s)[..2].to_vec(), vec!["Board:", "Work board task proj/1, role: agent."]);
     // a dialog only its screen has: said plainly, with the key that goes there; not the screen

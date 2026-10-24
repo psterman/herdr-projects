@@ -1,4 +1,4 @@
-//! Esc and the chat's latest message: with nothing else to step back from, esc hides the message as alt+c does,
+//! Esc and the chat's message: with nothing else to step back from, esc hides the message as alt+c does,
 //! before it says how the board closes (or, as a popup, closes it); a draft, find, the whole task and a filter come
 //! first.
 use crate::common;
@@ -26,7 +26,7 @@ fn esc_hides_the_latest_message_once_nothing_else_is_left_to_step_back_from() {
     s.press(&["esc"]);
     let c = crate::board_chat::chat(&mut s, 120);
     assert!(!c.framed && !s.s.chat_open, "{}", s.text());
-    assert!(c.hints.contains(&format!("{} show the latest message", key_name("chatMessage"))), "{}", c.hints);
+    assert!(c.hints.contains(&format!("{} show the chat's message", key_name("chatMessage"))), "{}", c.hints);
     assert!(!closing(&mut s), "hiding the message is the step: the board says nothing about closing yet");
     s.press(&["esc"]); assert!(closing(&mut s), "{}", s.text());
     assert!(!crate::board_chat::chat(&mut s, 120).framed, "esc never shows the message again");

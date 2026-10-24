@@ -77,7 +77,7 @@ fn a_terminal_held_at_another_size_the_board_draws_inside_what_is_shown_and_take
     assert!(has(&lines[48], r"^│ +│$") && has(&lines[47], r"^╭─ .*╮$") && lines[47].contains(&format!(" {me} ")), "{}", lines[47]);
     for n in 47..=52 { assert_eq!(sw::text::width(&lines[n]), 411); }
     assert!(has(&pin(&lines), r"Pin the chat to the bottom +█+░+ +55% 12m left {2}PR#3 {2}6m$"), "the columns are back in view: {}", pin(&lines));
-    assert!(has(&lines[55], &format!(r"{} hide the latest message · \? all keys *$", regex::escape(&key_name("chatMessage")))), "the chat's key is on the hint line, whole: {}", lines[55]);
+    assert!(has(&lines[55], &format!(r"{} hide the chat's message · \? all keys *$", regex::escape(&key_name("chatMessage")))), "the chat's key is on the hint line, whole: {}", lines[55]);
     // Held at 435x58 while a taller, narrower window shows it: the width is cut down, the rows are all there are.
     s.s.size.shown = sh(184, 78, false);
     let lines = s.screen(435);

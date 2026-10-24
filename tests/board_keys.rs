@@ -54,7 +54,7 @@ fn typing_adds_a_task_tab_delegates_space_replies_and_enter_opens_the_agent() {
     // coordinator can run here: space goes back to the box that adds tasks.
     assert!(s.text().contains("· space back") && !s.text().contains("esc close"), "{}", s.text());
     s.press(&["esc"]); assert!(!s.s.chat_open && s.s.reply && s.s.ask.is_none() && s.s.closing.is_none() && !s.closed);
-    assert!(s.text().contains(&format!("esc close · {} show the latest message", key_name("chatMessage"))), "{}", s.text());
+    assert!(s.text().contains(&format!("esc close · {} show the chat's message", key_name("chatMessage"))), "{}", s.text());
     s.press(&["esc"]); assert!(s.closed, "this board is the popup: the last esc closes it");
     s.closed = false;
     s.press(&["alt+c"]); assert!(s.s.chat_open);

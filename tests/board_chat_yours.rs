@@ -1,6 +1,6 @@
-//! Your words in a task agent's chat, as in the Coordinator's: the box shows what you just sent (bright, no label) until the
-//! answer comes, then the answer alone, also where you sent it while the agent worked (Claude Code queues it); the
-//! conversation keeps your words above it (alt+k), and the web board opens on the same part.
+//! Your words in a task agent's chat, as in the Coordinator's: the box shows what you just sent (bright, no label) at
+//! its end until the answer comes, then the answer under it, also where you sent it while the agent worked (Claude Code
+//! queues it); the conversation keeps your words above it, and the web board opens on the same part.
 use crate::common;
 use common::board::open;
 use common::*;
@@ -34,16 +34,16 @@ fn a_task_agents_chat_shows_your_words_until_its_answer_takes_their_place_and_ke
     let mut s = open(&w.root, 34); s.s.side = false;
     s.s.sel = id.clone(); s.load(); s.press(&["space"]);
     s.typed("yes, g too"); s.press(&["enter"]);
-    assert_eq!(crate::board_chat::chat(&mut s, 120).boxed, v(&["yes, g too", "", "❯ Send message to the agent"]));
-    // the answer takes their place: the box holds one message
+    assert_eq!(crate::board_chat::chat(&mut s, 120).boxed, v(&["Made f, with one line in it.", "", "yes, g too", "", "❯ Send message to the agent"]));
+    // the answer comes: the box holds the whole conversation, the answer last
     settle(&id); save_talk(&w, &id, "yes, g too", "Made g."); s.load();
-    assert_eq!(crate::board_chat::chat(&mut s, 120).boxed, v(&["Made g.", "", "❯ Send message to the agent"]));
+    assert_eq!(crate::board_chat::chat(&mut s, 120).boxed, v(&["Board:", "Work board task proj/1, role: agent.", "Make f", "", "Made f, with one line in it.", "", "yes, g too", "", "Made g.", "", "❯ Send message to the agent"]));
     assert!(s.s.just_sent.is_empty(), "your words are the conversation's own now");
-    // above them, the rest of the conversation
+    // the whole conversation fits the box: scrolling up finds nothing above it
     let mut all = vec![];
     for _ in 0..6 { s.press(&["alt+k"]); all.extend(crate::board_chat::chat(&mut s, 120).boxed); }
     for l in ["Board:", "Made f, with one line in it.", "yes, g too"] { assert!(all.iter().any(|x| x == l), "{l} in {all:?}"); }
-    // the web board opens on the same part: the answer alone
+    // the web board holds the same conversation and marks the newest part as where it opens
     s.s.chat_at = None;
     let side = sw::webui::model::side::side_of(&mut s.s, &s.theme.clone());
     let (parts, from) = (side.at("chat").arr("parts").to_vec(), side.at("chat").at("from").as_u64().unwrap() as usize);

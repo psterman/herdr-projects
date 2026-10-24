@@ -130,7 +130,7 @@ pub struct State {
     /// click (line, first and last cell, which); grouped by machine, the third way alt+s groups the list.
     pub show: usize, pub show_n: Vec<usize>, pub show_hits: Vec<(usize, usize, usize, usize)>, pub by_machine: bool,
     pub filter: String, pub msg: String, pub msg_kind: Ink,
-    /// The chat: open on the latest message, folded to its head line, or on its own with nothing around it (the
+    /// The chat: open on the conversation's end, folded to its head line, or on its own with nothing around it (the
     /// conversation's own view, `board.view`); what you sent it and what came of it, where its message stands, and
     /// where it is on the screen.
     pub chat_open: bool, pub chat_folded: bool, pub chat_whole: bool, pub just_sent: HashMap<String, Sent>, pub chat_at: Option<ChatAt>, pub chat_fit: Option<ChatFit>, pub chat_rows: Option<(usize, usize)>,

@@ -1,7 +1,7 @@
-//! Back to the newest message: the chat's box holds one message, the newest, whoever said it (your words only until
-//! the answer comes); alt+k opens it to the conversation, alt+j scrolls down, and alt+j once more from the end always
-//! closes it to that one message again, from wherever it was opened, for the Coordinator and for a task's agent, also
-//! after new messages came while it was open and with a draft.
+//! Back to the end of the conversation: the chat's box holds the conversation, the newest thing said last (your words at
+//! its end until the answer comes); alt+k opens it to the conversation above, alt+j scrolls down, and alt+j once more
+//! from the end always closes it to that end again, from wherever it was opened, for the Coordinator and for a task's
+//! agent, also after new messages came while it was open and with a draft.
 use crate::common;
 use common::board::{open, Board};
 use common::*;
@@ -62,17 +62,17 @@ fn back(b: &mut Board, before: &mut dyn FnMut(&mut Board), cols: usize) -> usize
 }
 
 #[test]
-fn the_box_holds_only_the_newest_message_whoever_said_it_your_words_only_until_the_answer() {
-    // The answer alone: your question is one scroll up.
+fn the_box_holds_the_conversation_the_newest_thing_said_last() {
+    // The answer under your question: the box holds the conversation, the newest thing said last.
     let mut c = C::new(exchange(1));
-    assert_eq!(message(&c.boxed()), v(&["Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3."]));
+    assert_eq!(message(&c.boxed()), v(&["Question 1?", "", "Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3."]));
     c.key("alt+k"); assert!(c.boxed().contains(&"Question 1?".to_string()), "{:?}", c.boxed());
-    c.key("alt+j"); assert_eq!(message(&c.boxed()), v(&["Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3."]), "alt+j at the end: back to the answer alone");
-    // Your words, until the answer comes: then alone too.
+    c.key("alt+j"); assert_eq!(message(&c.boxed()), v(&["Question 1?", "", "Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3."]), "alt+j at the end: back to the end of the conversation");
+    // Your words at its end, until the answer comes; the answer under them after.
     c.talk.push((true, "And now?".into()));
-    assert_eq!(message(&c.boxed()), v(&["And now?"]));
+    assert_eq!(message(&c.boxed()), v(&["Question 1?", "", "Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3.", "", "And now?"]));
     c.talk.push((false, "Now this.".into())); c.turn = "turn-2".into();
-    assert_eq!(message(&c.boxed()), v(&["Now this."]));
+    assert_eq!(message(&c.boxed()), v(&["Question 1?", "", "Answer 1 line 1.", "Answer 1 line 2.", "Answer 1 line 3.", "", "And now?", "", "Now this."]));
     // A task's agent the same, on the web board too: one part, the newest.
     use sw::board::view::talk::{opens_at, talk, Part};
     let part = |by: &str, sent: bool| Part { by: by.into(), text: "x".into(), sent, ..Default::default() };
@@ -88,39 +88,39 @@ fn the_box_holds_only_the_newest_message_whoever_said_it_your_words_only_until_t
 }
 
 #[test]
-fn alt_j_scrolls_down_and_once_more_at_the_end_closes_the_coordinators_chat_to_the_newest_message_from_anywhere() {
+fn alt_j_scrolls_down_and_once_more_at_the_end_closes_the_coordinators_chat_to_the_conversations_end_from_anywhere() {
     let mut c = C::new(exchange(4));
-    let newest = message(&c.boxed());
-    assert_eq!(newest, v(&["Answer 4 line 1.", "Answer 4 line 2.", "Answer 4 line 3."]));
+    let end = message(&c.boxed());
+    assert_eq!(end, v(&["Answer 2 line 2.", "Answer 2 line 3.", "", "Question 3?", "", "Answer 3 line 1.", "Answer 3 line 2.", "Answer 3 line 3.", "", "Question 4?", "", "Answer 4 line 1.", "Answer 4 line 2.", "Answer 4 line 3."]), "the box holds the conversation's end, as many lines as fit");
     // From every place in the conversation: alt+k that many times, then alt+j down to the end and once more.
     for ups in 1..=8 {
         for _ in 0..ups { c.key("alt+k"); }
         assert!(c.b.s.chat_at.as_ref().unwrap().top.is_some(), "alt+k opened it");
-        assert_ne!(message(&c.boxed()), newest);
+        assert_ne!(message(&c.boxed()), end);
         c.back();
-        assert_eq!(message(&c.boxed()), newest, "after {ups} alt+k");
+        assert_eq!(message(&c.boxed()), end, "after {ups} alt+k");
     }
     // At the end of the open conversation one alt+j closes it.
     c.key("alt+k"); c.key("alt+j"); c.boxed();
     assert_eq!(c.b.s.chat_fit.as_ref().unwrap().below, 0); assert!(c.b.s.chat_at.as_ref().unwrap().top.is_some());
-    c.key("alt+j"); assert_eq!(message(&c.boxed()), newest);
+    c.key("alt+j"); assert_eq!(message(&c.boxed()), end);
     // With a draft: the same, and the draft is whole.
     c.apply(); c.b.typed("half typed");
     c.key("alt+k"); c.key("alt+k"); c.back();
-    assert_eq!(message(&c.boxed()), newest); assert_eq!(c.b.s.value(), "half typed");
+    assert_eq!(message(&c.boxed()), end); assert_eq!(c.b.s.value(), "half typed");
     c.key("esc");
-    // Hidden while open (alt+c, the only key that hides and shows it): shown again, the newest alone (board_chat_open.rs).
+    // Hidden while open (alt+c, the only key that hides and shows it): shown again, the conversation's end (board_chat_open.rs).
     c.key("alt+k"); c.key("alt+c"); assert!(!c.b.s.chat_open); c.boxed(); c.key("alt+j"); c.key("alt+c");
-    assert_eq!(message(&c.boxed()), newest);
+    assert_eq!(message(&c.boxed()), end);
 }
 
 #[test]
 fn a_short_conversation_that_starts_with_your_words_closes_too() {
     // Your words first, the answer under them: the whole conversation fits the box, open or not.
     let mut c = C::new(vec![(true, "Where do things stand?".into()), (false, "Six tasks are in progress.".into())]);
-    assert_eq!(message(&c.boxed()), v(&["Six tasks are in progress."]));
-    c.key("alt+k"); assert_eq!(message(&c.boxed()), v(&["Where do things stand?", "", "Six tasks are in progress."]));
-    c.key("alt+j"); assert_eq!(message(&c.boxed()), v(&["Six tasks are in progress."]));
+    assert_eq!(message(&c.boxed()), v(&["Where do things stand?", "", "Six tasks are in progress."]));
+    c.key("alt+k"); assert_eq!(message(&c.boxed()), v(&["Where do things stand?", "", "Six tasks are in progress."]), "the whole conversation fits: there is nothing above it");
+    c.key("alt+j"); assert_eq!(message(&c.boxed()), v(&["Where do things stand?", "", "Six tasks are in progress."]));
 }
 
 #[test]
@@ -149,9 +149,9 @@ fn back_from_start(c: &mut C) -> usize {
 }
 
 // Whether new messages leave an opened box open is HSW-226's to settle (it does on its branch); this holds either way:
-// alt+j from wherever the box is ends on the newest message alone.
+// alt+j from wherever the box is ends on the conversation's end.
 #[test]
-fn new_messages_while_it_is_open_alt_j_still_goes_down_to_the_end_and_closes_it_to_the_newest() {
+fn new_messages_while_it_is_open_alt_j_still_goes_down_to_the_end_and_closes_it_to_the_end() {
     for at_end in [false, true] {
         let mut c = C::new(exchange(3));
         for _ in 0..4 { c.key("alt+k"); }
@@ -161,7 +161,7 @@ fn new_messages_while_it_is_open_alt_j_still_goes_down_to_the_end_and_closes_it_
         c.talk.push((false, lines("Answer 4", 3))); c.turn = "turn-2".into(); c.boxed();
         c.talk.push((false, "And one more thing.".into())); c.turn = "turn-3".into(); c.boxed();
         c.back();
-        assert_eq!(message(&c.boxed()), v(&["And one more thing."]), "at the end: {at_end}");
+        assert_eq!(message(&c.boxed()), v(&["", "Question 3?", "", "Answer 3 line 1.", "Answer 3 line 2.", "Answer 3 line 3.", "", "Question 4?", "", "Answer 4 line 1.", "Answer 4 line 2.", "Answer 4 line 3.", "", "And one more thing."]), "at the end: {at_end}");
     }
 }
 
@@ -180,7 +180,7 @@ fn save_talk(w: &World, id: &str, said: &[(bool, String)]) {
 }
 
 #[test]
-fn a_task_agents_chat_alt_j_at_the_end_closes_it_to_the_newest_message_also_after_new_ones_came() {
+fn a_task_agents_chat_alt_j_at_the_end_closes_it_to_the_conversations_end_also_after_new_ones_came() {
     let w = world_with(Opts { repo: true, settings: json!({ "review.when": "never" }), ..Default::default() });
     w.script(json!({ "worker": [{ "files": { "f.txt": "1\n" }, "commit": "1", "note": "Made f." }] }));
     let id = w.add("Make f");
@@ -190,17 +190,18 @@ fn a_task_agents_chat_alt_j_at_the_end_closes_it_to_the_newest_message_also_afte
     save_talk(&w, &id, &talk);
     let mut s = open(&w.root, 30); s.s.side = false;
     s.s.sel = id.clone(); s.load(); s.press(&["space"]); assert!(s.s.reply);
-    assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), v(&["Made g."]));
+    let held = v(&["", "Answer 3 line 1.", "Answer 3 line 2.", "Answer 3 line 3.", "", "Question 3?", "", "Answer 4 line 1.", "Answer 4 line 2.", "Answer 4 line 3.", "", "Question 4?", "", "Made g."]);
+    assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), held);
     for ups in [1, 3, 8] {
         for _ in 0..ups { s.press(&["alt+k"]); }
-        assert_ne!(message(&crate::board_chat::chat(&mut s, 120).boxed), v(&["Made g."]));
+        assert_ne!(message(&crate::board_chat::chat(&mut s, 120).boxed), held);
         back(&mut s, &mut |_| {}, 120);
-        assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), v(&["Made g."]), "after {ups} alt+k");
+        assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), held, "after {ups} alt+k");
     }
-    // Open, then the agent says more: alt+j down to the end and once more, the newest alone.
+    // Open, then the agent says more: alt+j down to the end and once more, the conversation's end.
     for _ in 0..3 { s.press(&["alt+k"]); }
     talk.push((true, "And h?".into())); talk.push((false, "Made h.".into()));
     save_talk(&w, &id, &talk); s.load();
     back(&mut s, &mut |_| {}, 120);
-    assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), v(&["Made h."]));
+    assert_eq!(message(&crate::board_chat::chat(&mut s, 120).boxed), v(&["", "Question 3?", "", "Answer 4 line 1.", "Answer 4 line 2.", "Answer 4 line 3.", "", "Question 4?", "", "Made g.", "", "And h?", "", "Made h."]));
 }

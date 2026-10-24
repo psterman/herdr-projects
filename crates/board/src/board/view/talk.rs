@@ -36,8 +36,8 @@ pub fn with_mine(parts: Vec<Part>, mine: &str) -> Vec<Part> {
     out.push(Part { by: "You".into(), text: labelled(words), whole: words.into(), mine: true, sent: true, ..Default::default() });
     out
 }
-/// The part a chat's box opens on, and the only one it holds until you scroll up: the newest thing said, whoever said
-/// it. Your own words are that only until the answer comes; then the answer alone.
+/// The part a chat's box opens on: the newest thing said, whoever said it. Your own words are that only until the
+/// answer comes; then the answer alone. The box holds that part and the turns above it that fit (chat.rs).
 pub fn opens_at(parts: &[Part]) -> usize { parts.len().saturating_sub(1) }
 pub fn talk(r: &Obj) -> Talk {
     let tk = r.at("snap").at("talk");
