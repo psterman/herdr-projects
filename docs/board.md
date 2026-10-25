@@ -98,6 +98,9 @@ place (the panel draws the ones that are on, in the order the menu has them), `d
 board, and how it grew), `g` and `G` go to the first or the last, `Esc` closes it. The panel above the menu follows
 every change at once. What the menu leaves is saved, and the board keeps it (`board.top`).
 
+While the menu is open the conversation gives up room for it, as it does under the `?` menu, and where the window is
+too small for every chart the menu shows the ones around the picked one.
+
 Where the window is narrow the counts go first, the bar keeps its room, and where there is no room for the panel at all
 it gives way before the list does.
 

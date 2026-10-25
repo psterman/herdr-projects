@@ -60,7 +60,7 @@ fn list_part(s: &mut State, t: &Theme, w: usize, h: usize, screen_w: usize, abov
         let mut v = head.clone();
         v.extend(panel);
         // The panel's menu stands where the list stands, and the panel above it follows every change.
-        if s.top_panel.menu.is_some() { v.extend(super::top_panel::menu::lines(s, t, w).into_iter().take(h.saturating_sub(v.len()))); }
+        if s.top_panel.menu.is_some() { v.extend(super::top_panel::menu::lines(s, t, w, h.saturating_sub(v.len()))); }
         else { v.extend(list_lines(s, t, w, h.saturating_sub(v.len()).max(1), screen_w)); }
         v
     }).unwrap_or_else(|why| { s.list_at = None; vec![failed(&format!("The list could not be shown: {why}"), w)] })
@@ -129,7 +129,7 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
         let give = if w.text.is_empty() { 0 } else { (draft_rows - 1).min(3 - spare).max(0) };
         draft_rows -= give; spare += give;
         if !w.text.is_empty() && spare < 1 { spare = (spare + 1).min(1); }
-        let most = if s.full || s.menu.is_some() { 8.min(rows_n as i64 / 3 - 2) } else { (rows_n as i64 * 2) / 3 - draft_rows - 3 };
+        let most = if s.full || s.menu.is_some() || s.top_panel.menu.is_some() { 8.min(rows_n as i64 / 3 - 2) } else { (rows_n as i64 * 2) / 3 - draft_rows - 3 };
         let message = chat_message(s, Some(w), super::textbox::inner_width(width), spare.min(most.max(3)).max(0) as usize);
         message_n = message.len();
         if message_n > 0 { let (l, c) = chat_box(s, width, draft_rows.max(1) as usize, r.as_ref(), &message); input = l; cursor = c; }

@@ -131,3 +131,23 @@ fn a_click_on_the_bar_shows_that_state() {
     assert_eq!(s.s.show, 5, "the to do tasks are shown");
 }
 
+
+#[test]
+fn the_menu_shows_every_chart_where_there_is_room_and_the_picked_one_where_there_is_not() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    s.press(&["alt+g"]);
+    let rows = s.screen(120);
+    assert!(rows.iter().any(|l| l.contains("● States")), "{rows:?}");
+    assert!(rows.iter().any(|l| l.contains("○ Limits")), "every chart is there where there is room: {rows:?}");
+    // a window too small for them all: the picked one is in sight
+    s.rows = 10;
+    s.press(&["G"]);
+    let rows = s.screen(120);
+    assert!(rows.iter().any(|l| l.contains("Limits")), "the picked chart is in sight: {rows:?}");
+    assert!(!rows.iter().any(|l| l.contains("States")), "the others do not fit there: {rows:?}");
+    s.press(&["g"]); // the first one
+    let rows = s.screen(120);
+    assert!(rows.iter().any(|l| l.contains("States")), "and the first one is in sight too: {rows:?}");
+}
