@@ -148,22 +148,22 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
     let mut bottom: Vec<Inked> = vec![];
     bottom.extend(jobs.iter().cloned()); bottom.extend(chat.iter().cloned());
     let input_at = bottom.len();
-    bottom.extend(input.iter().cloned()); bottom.extend(said.iter().cloned());
+    bottom.extend(input.iter().cloned());
     // The hint line is one line, whatever it says: it is made once the rest is drawn (what the whole task has to
     // scroll is known only then).
-    let held = if rows_n as i64 - bottom.len() as i64 - hint_n as i64 > 3 { super::held_lines(s, width) } else { vec![] };
-    let h = rows_n.saturating_sub(bottom.len() + hint_n + held.len()).max(hint_n);
-    // Where the chat is on the screen, for the wheel: from the line that says who you talk to, to its box's end.
-    let chat_top = held.len() + h + jobs.len();
-    s.chat_rows = if message_n > 0 { Some((chat_top, chat_top + chat.len() + input.len())) } else { None };
+    let held = if rows_n as i64 - bottom.len() as i64 - said.len() as i64 - hint_n as i64 > 3 { super::held_lines(s, width) } else { vec![] };
+    let h = rows_n.saturating_sub(bottom.len() + said.len() + hint_n + held.len()).max(hint_n);
     s.list_at = None;
     let shown_job = s.job().cloned();
-    let top: Vec<Inked> = if s.menu.is_some() { super::menu::menu_lines(s, t, width, h) }
-        else if let (Some(a), true) = (&auto, s.auto_open) { super::panel::auto::auto_full(s, t, a, width, h) }
-        else if crate::board::update::edit::mine_open(s) { super::panel::page::mine_full(s, t, width, h) }
-        else if s.chat_whole { super::guard::part(|| super::talk_panel::conversation(s, who.as_ref(), width, h)).unwrap_or_else(|why| vec![failed(&format!("The conversation could not be shown: {why}"), width)]) }
-        else if let (true, None, Some(c)) = (s.full, &r, crate::board::update::pilot::selected(s)) { super::panel::coord::coord_full(s, &c, width, h) }
-        else if s.full && (r.is_some() || shown_job.is_some()) { let x = r.clone().or(shown_job.clone()).unwrap(); super::guard::part(|| super::panel::full_panel(s, t, &x, width, h)).unwrap_or_else(|why| vec![Inked::new(), failed(&format!("The task details could not be shown: {why}"), width)]) }
+    // The rows above the box. A page (the menu, a task's own page, the conversation on its own) keeps the whole room,
+    // so that its box stays at the foot of the window; the list keeps only its own rows, so that the box follows it
+    // right away, with no empty band between.
+    let top: Vec<Inked> = if s.menu.is_some() { pad(super::menu::menu_lines(s, t, width, h), h) }
+        else if let (Some(a), true) = (&auto, s.auto_open) { pad(super::panel::auto::auto_full(s, t, a, width, h), h) }
+        else if crate::board::update::edit::mine_open(s) { pad(super::panel::page::mine_full(s, t, width, h), h) }
+        else if s.chat_whole { pad(super::guard::part(|| super::talk_panel::conversation(s, who.as_ref(), width, h)).unwrap_or_else(|why| vec![failed(&format!("The conversation could not be shown: {why}"), width)]), h) }
+        else if let (true, None, Some(c)) = (s.full, &r, crate::board::update::pilot::selected(s)) { pad(super::panel::coord::coord_full(s, &c, width, h), h) }
+        else if s.full && (r.is_some() || shown_job.is_some()) { let x = r.clone().or(shown_job.clone()).unwrap(); pad(super::guard::part(|| super::panel::full_panel(s, t, &x, width, h)).unwrap_or_else(|why| vec![Inked::new(), failed(&format!("The task details could not be shown: {why}"), width)]), h) }
         else if width >= WIDE && s.side {
             // The task panel on the right, while you have it open, on herdr's sidebar colour when the theme gives it one.
             let pane_w = 38.max(70.min(width * 38 / 100));
@@ -172,19 +172,33 @@ fn draw_at(s: &mut State, t: &Theme, width: usize, rows: usize) -> Screen {
             let right: Vec<Inked> = super::guard::part(|| if let Some(x) = r.clone().or(shown_job.clone()) { super::panel::panel(s, t, &x, pane_w, false, h) } else if let Some(a) = &auto { super::panel::auto::auto_panel(s, t, a, pane_w, false).0 } else if let Some(c) = crate::board::update::pilot::selected(s) { super::panel::coord::coord_panel(s, &c, pane_w, false) } else { vec![Inked::new(), Inked::plain(" ").add(Inked::of("Nothing selected.", Ink::Muted))] })
                 .unwrap_or_else(|why| std::iter::once(Inked::new()).chain(Inked::of(format!("✗ The task panel could not be shown: {why}"), Ink::Red).wrap(pane_w.saturating_sub(2).max(10)).into_iter().map(|l| Inked::plain(" ").add(l))).collect());
             (0..h).map(|i| left.get(i).cloned().unwrap_or_default().fit(list_w).add(Inked::plain(" ")).add(Inked::of("│", Ink::Dim)).add(Inked::plain(" ").add(right.get(i).cloned().unwrap_or_default()).fit(pane_w + 1).on(Ink::Sidebar))).collect()
-        } else { list_part(s, t, width, h, width, held.len()) };
+        } else {
+            // The list's own rows: the empty band under them goes away.
+            let mut v = list_part(s, t, width, h, width, held.len());
+            v.truncate(h);
+            while v.last().is_some_and(|l| l.is_empty()) { v.pop(); }
+            v
+        };
+    // Where the chat is on the screen, for the wheel: from the line that says who you talk to, to its box's end.
+    let chat_top = held.len() + top.len() + jobs.len();
+    s.chat_rows = if message_n > 0 { Some((chat_top, chat_top + chat.len() + input.len())) } else { None };
     // The last line says what the board holds, or what the keys do: which of the two is your own setting.
+    let mut last: Option<Inked> = None;
     match super::guard::part(|| hints(s, r.as_ref(), who.as_ref())) {
         Ok((hint_list, chat_key)) => {
             s.chat_key_shown = chat_key.is_some();
-            if hint_n > 0 { bottom.push(if crate::board::status_line::is_data() { super::status::status_line(s, width) } else { hint_line(hint_list, chat_key.as_ref(), width) }); }
+            if hint_n > 0 { last = Some(if crate::board::status_line::is_data() { super::status::status_line(s, width) } else { hint_line(hint_list, chat_key.as_ref(), width) }); }
         }
-        Err(why) => bottom.push(failed(&format!("The hints could not be shown: {why}"), width)),
+        Err(why) => last = Some(failed(&format!("The hints could not be shown: {why}"), width)),
     }
     let mut out = held.clone();
-    out.extend(pad(top, h));
+    out.extend(top);
     let input_line = out.len() + input_at;
     out.extend(bottom);
+    // The rows the list did not need stand above the last line, which stays the last.
+    out.extend(std::iter::repeat_with(Inked::new).take(rows_n.saturating_sub(out.len() + said.len() + usize::from(last.is_some()))));
+    out.extend(said.iter().cloned());
+    if let Some(l) = last { out.push(l); }
     let cursor = cursor.map(|(l, c)| ((c.min(width.saturating_sub(1))) as u16, (input_line + l) as u16)).filter(|(_, y)| (*y as usize) < rows_n);
     Screen { lines: pad(out, rows_n).into_iter().map(|l| l.cut(width)).collect(), cursor }
 }

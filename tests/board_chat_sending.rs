@@ -48,7 +48,8 @@ fn a_task_agents_chat_shows_your_words_the_moment_you_send_them_and_takes_them_b
     let c = crate::board_chat::chat(&mut s, 120);
     assert_eq!(c.boxed, v(&["Made f.", "", "yes, g too", "", "❯ Send message to the agent"]), "{}", c.lines.join("\n"));
     assert!(c.who.ends_with("› PRJ-1"), "the box says whose it is: {}", c.who);
-    assert!(!c.lines[..c.lines.len() - 6].iter().any(|l| l.contains("yes, g too")), "nothing of it over the chat: {}", c.lines.join("\n"));
+    let top = c.lines.iter().rposition(|l| l.starts_with("╭─") && l.ends_with('╮')).expect("a box");
+    assert!(!c.lines[..top].iter().any(|l| l.contains("yes, g too")), "nothing of it over the chat: {}", c.lines.join("\n"));
     // delivered: the same box
     s.run(fx);
     assert_eq!(crate::board_chat::chat(&mut s, 120).boxed, v(&["Made f.", "", "yes, g too", "", "❯ Send message to the agent"]));

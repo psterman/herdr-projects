@@ -112,7 +112,7 @@ fn the_board_takes_its_terminal_back_by_itself_and_again_when_a_viewer_comes_bac
     assert_eq!(see(&mut a, (435, 58), tall), vec![(183, 58)]);
     update(&mut a.s, Event::Took(Ok(()))); a.rows = 78; see(&mut a, (184, 78), tall);
     let l = a.screen(184);
-    assert_eq!(l.len(), 78); assert!(has(&l[77], r"^[ ▌] \S.* · "), "{}", l.join("\n")); assert_eq!(l[75], "─".repeat(184));
+    assert_eq!(l.len(), 78); assert!(has(&l[77], r"^[ ▌] \S.* · "), "{}", l.join("\n"));
     assert!(l[76].contains("Another viewer held this terminal at 435×58: it was disconnected, and your window has it again."), "{}", l[76]);
     // A viewer that comes back is sent away again, every time: the board has its pane's size, always.
     let mut took = 1;

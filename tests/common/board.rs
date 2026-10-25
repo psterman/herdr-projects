@@ -79,7 +79,10 @@ impl Board {
             (Some(top), Some(end)) => {
                 for l in &lines[top..=end] { assert_eq!(sw::text::width(l), cols, "the box is as wide as the window: {l:?}"); }
                 let inner = |l: &String| { let c: Vec<char> = l.chars().collect(); c[2..c.len() - 2].iter().collect::<String>().trim_end().to_string() };
-                Chat { framed: true, who: lines[top - 1].clone(), boxed: lines[top + 1..end].iter().map(inner).collect(), hints: lines.get(end + 1).cloned().unwrap_or_default().trim().to_string(), lines }
+                // The last line is the board's own (what it holds, or what the keys do): the box may stand above it, with
+                // the rows the list did not need between.
+                let hints = if end + 1 < lines.len() { lines.last().cloned().unwrap_or_default() } else { String::new() };
+                Chat { framed: true, who: lines[top - 1].clone(), boxed: lines[top + 1..end].iter().map(inner).collect(), hints: hints.trim().to_string(), lines }
             }
             _ => { let at = lines.iter().rposition(|l| l.starts_with('❯')).unwrap_or(0); Chat { framed: false, who: lines[at.saturating_sub(2)].clone(), boxed: vec![lines[at].clone()], hints: lines.last().cloned().unwrap_or_default().trim().to_string(), lines } }
         }

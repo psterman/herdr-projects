@@ -6,10 +6,10 @@
 ▌   Found the cause; now
 ▌   checking every caller of …
 ▌          ████████░░░░░    1m
-
 ──────────────────────────────
 ❯ Add a task
 ──────────────────────────────
+
   alt+o open this task's agent
 == the task beside it
  herdr-projects  proj
@@ -58,8 +58,8 @@
 ▌   Found the cause; now
 ▌   checking every caller of …
 ▌          ████████░░░░░    1m
-
 ──────────────────────────────
 ❯ Hello 日本 🚀
 ──────────────────────────────
+
   enter add it as a task

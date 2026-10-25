@@ -6,13 +6,13 @@
        Autopilot · next check-in in 6h · 1 of 5 today
 ▌    ○ PRJ-1 Fix the docs index                                                               0s ago
 
-
-
 ╭─  HOST ╮
 │                                                                                                  │
 │  ❯ Send message to the machine coordinator                                                       │
 │                                                                                                  │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
   ctrl+s put an agent on this task · space talk about this task · ? all keys
 
  herdr-projects  proj · PRJ
@@ -23,11 +23,11 @@
       Autopilot · next check-in in 6h · 1 of 5 today
 ▌  ○ PRJ-1 Fix the docs index
 
-
-
 ╭─  HOST ╮
 │                                                      │
 │  ❯ Send message to the machine coordinator           │
 │                                                      │
 ╰──────────────────────────────────────────────────────╯
+
+
   ctrl+s put an agent on this task · ? all keys
