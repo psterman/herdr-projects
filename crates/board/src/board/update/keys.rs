@@ -44,6 +44,7 @@ fn press(s: &mut State, p: &Press, fx: &mut Vec<Effect>) {
     let enter = is(p, K::Enter);
     if s.ask.is_some() { return answer(s, p, esc, close, fx); }
     if s.menu.is_some() { return super::menu::key(s, p, fx); }
+    if s.top_panel.menu.is_some() { return super::top_panel::key(s, p, fx); } // the panel's menu takes its own keys
     if s.editing.is_some() && super::edit::key(s, p, fx) { return; } // the settings page takes its own keys
     if s.auto().is_some() && super::autos::key(s, p, fx) { return; } // and so does an automation's row
     s.stick.clear();
@@ -159,6 +160,7 @@ pub fn run_as(s: &mut State, k: K, p: &Press, r: Option<&Obj>, fx: &mut Vec<Effe
         // By status, by repo, by machine, and round again.
         K::ByRepo => { (s.by_repo, s.by_machine) = (!s.by_repo && !s.by_machine, s.by_repo); fx.push(Effect::Save); relist(s); }
         K::AllDone => { s.all_done = !s.all_done; relist(s); }
+        K::TopPanel => super::top_panel::open(s),
         K::Scope => super::remotes::next_scope(s, fx),
         // Decided by the state, above: nothing of their own here.
         // Its line in the ? menu: as the key itself does with nothing typed (the key goes through the state, above).

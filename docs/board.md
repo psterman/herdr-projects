@@ -1,7 +1,7 @@
 # The board: the list and the chat
 
 **The board is one list of tasks and one chat.** The header on top says whose tasks show, and the filter row under it
-how many stand in each status. The list sorts the tasks by what they need from you. The chat at the bottom talks to the Coordinator, or to the selected task's
+how many stand in each status. A strip of charts stands on top of the list ([the top panel](#the-top-panel)). The list sorts the tasks by what they need from you. The chat at the bottom talks to the Coordinator, or to the selected task's
 agent.
 
 ```
@@ -31,7 +31,7 @@ agent.
 - `Tab` shows the next filter: only the tasks that need you, those at work, and so on ([below](#the-filter-row)).
 - Type and press `Enter` to send. The Coordinator decides what to start: ask it to in your words. `Ctrl+S` puts an agent
   on the selected task.
-- `Alt+P` shows the [task panel](task-panel.md) beside the list. `?` lists every key ([keys](keys.md)).
+- `Alt+P` shows the [task panel](task-panel.md) beside the list. `Alt+G` opens the [top panel's menu](#the-top-panel). `?` lists every key ([keys](keys.md)).
 
 ## The header
 
@@ -74,6 +74,32 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
   `Ctrl+X` start and stop it, `Ctrl+O` is its autopilot ([machine and project coordinators](machine-and-project-coordinators.md)).
 - **Where the window is narrow** the names are shorter (`Coords`, `Needs`, `Autos`), then shortest (`Co`, `Need`,
   `Work`), then the filters with nothing in them go; narrower still, only the one shown stands, with `tab next`.
+
+## The top panel
+
+**A strip of charts on top of the list, under the filter row.** It is there as long as the window has room for it, and
+`Alt+G` opens the menu that says what it shows.
+
+```
+ ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
+```
+
+| Chart | What it shows |
+|---|---|
+| `States` | what the board holds, by state: one bar, each state in its own colour (the colours its marks have), and the counts of the states that have something in them. A click on a part of the bar shows that state, as the filter row does |
+| `Activity` | new tasks a day, for 14 days: a cell for each day, as high as that day was |
+| `Finished` | tasks that reached done, a day, the same way |
+| `Waiting` | how many wait for you, and how long the oldest of them has waited |
+| `Limits` | what the running tasks have used of their caps: the most used of them, what part of that is, and how many are near theirs |
+
+The menu lists the charts with a mark each (`●` on, `○` off): `Space` turns one on or off, `←` `→` move it to another
+place (the panel draws the ones that are on, in the order the menu has them), `d` puts the default back (the shape of the
+board, and how it grew), `g` and `G` go to the first or the last, `Esc` closes it. The panel above the menu follows
+every change at once. What the menu leaves is saved, and the board keeps it (`board.top`).
+
+Where the window is narrow the counts go first, the bar keeps its room, and where there is no room for the panel at all
+it gives way before the list does.
 
 ## Grouping: by status, by repo, by machine
 

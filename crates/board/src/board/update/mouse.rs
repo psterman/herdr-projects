@@ -14,6 +14,7 @@ pub fn wheel(s: &mut State, y: usize, by: i64, _fx: &mut Vec<Effect>) {
     let d = if by < 0 { -1 } else { 1 };
     if let Some((from, to)) = s.chat_rows { if y >= from && y < to { super::chat::scroll(s, by * WHEEL); return; } }
     if s.menu.is_some() { let n = super::menu::items(s).len(); return super::menu::step(s, d, n); }
+    if s.top_panel.menu.is_some() { let n = s.top_panel.menu.as_ref().map(|m| m.charts.len()).unwrap_or(0); return super::top_panel::step(s, d, n); }
     if s.full || s.auto_open || s.chat_whole { return super::actions::scroll_panel(s, by * WHEEL); }
     if locked(s) { s.top_free = true; s.top = (s.top as i64 + d * WHEEL).max(0) as usize; return; }
     s.stick.clear();
@@ -22,12 +23,17 @@ pub fn wheel(s: &mut State, y: usize, by: i64, _fx: &mut Vec<Effect>) {
 }
 /// A click on a row of the list selects it; on the selected one it does nothing more. On a heading it folds or unfolds it.
 pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
-    if s.leaving || s.setup.is_some() || s.ask.is_some() || !s.paste_text.is_empty() || s.menu.is_some() || s.full || s.auto_open { return; }
+    if s.leaving || s.setup.is_some() || s.ask.is_some() || !s.paste_text.is_empty() || s.menu.is_some() || s.top_panel.menu.is_some() || s.full || s.auto_open { return; }
     let Some((top, wide)) = s.list_at else { return };
     // A click on the filter row shows that filter (view/shows_row.rs).
     if let Some(n) = s.show_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3) {
         if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
         if n == crate::board::view::shows_row::MACHINE { return super::remotes::next_scope(s, fx); }
+        return super::shows::set(s, n, fx);
+    }
+    // A click on a part of the top panel's bar shows that state (view/top_panel/states.rs).
+    if let Some(n) = s.top_panel.hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3) {
+        if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
         return super::shows::set(s, n, fx);
     }
     let id = if x < wide && y >= top { s.list_ids.get(y - top).cloned().unwrap_or_default() } else { String::new() };

@@ -1,23 +1,23 @@
 == the list
  herdr-projects  proj
  All 18  tab next
+ ███████████████  needs you 5
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
 ▌ ◐ #5     Max length for task
 ▌          titles
 ▌   Found the cause; now
 ▌   checking every caller of …
-▌          ████████░░░░░    1m
 ──────────────────────────────
 ❯ Add a task
 ──────────────────────────────
-
   alt+o open this task's agent
 == the task beside it
  herdr-projects  proj
  All 18  tab next
+ ███████████████  needs you 5
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
 ▌ ◐ #5     Max length for task
 ▌          titles
-▌   Found the cause; now
-▌   checking every caller of …
 ──────────────────────────────
 ❯ Add a task
 ──────────────────────────────
@@ -45,7 +45,7 @@
                 headings
    ← →          fold the
                 heading; on a
- ↓ 185 more
+ ↓ 191 more
 ──────────────────────────────
 ❯ Add a task
 ──────────────────────────────
@@ -53,13 +53,13 @@
 == a draft
  herdr-projects  proj
  All 18  tab next
+ ███████████████  needs you 5
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
 ▌ ◐ #5     Max length for task
 ▌          titles
 ▌   Found the cause; now
 ▌   checking every caller of …
-▌          ████████░░░░░    1m
 ──────────────────────────────
 ❯ Hello 日本 🚀
 ──────────────────────────────
-
   enter add it as a task

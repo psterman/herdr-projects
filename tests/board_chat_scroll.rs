@@ -241,7 +241,7 @@ fn a_tall_draft_in_a_small_window_never_takes_the_answer_away_it_gives_rows_back
 fn the_whole_conversation_can_take_the_pane_on_its_own_and_up_and_down_scroll_it() {
     let mut b = B::new(30, 4);
     // The list of tasks is there to begin with.
-    assert!(b.screen(120).iter().any(|l| l.contains("Task number 1")), "the list is there");
+    assert!(b.screen(120).iter().any(|l| l.contains("Task number")), "the list of tasks is there");
     // The conversation, on its own, whole: the list gives way to it.
     b.key(&["alt+w"]);
     assert!(b.b.s.chat_whole, "the conversation is on its own");
@@ -257,7 +257,7 @@ fn the_whole_conversation_can_take_the_pane_on_its_own_and_up_and_down_scroll_it
     // And the list is there again.
     b.key(&["alt+w"]);
     assert!(!b.b.s.chat_whole);
-    assert!(b.screen(120).iter().any(|l| l.contains("Task number 1")), "the list is back");
+    assert!(b.screen(120).iter().any(|l| l.contains("Task number")), "the list is back");
 }
 
 #[test]

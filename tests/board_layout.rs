@@ -1,5 +1,5 @@
-//! The whole screen: the chat block (the text box, which names who you talk to, what just happened, the hints) ends on the window's
-//! last line and the list has every line above it, at any height, through a resize, while the block grows or shrinks.
+//! The whole screen: the chat block (the text box, which names who you talk to, what just happened, the hints) stands
+//! right under the list, and the hints are the last line, at any height, through a resize, while the block grows or shrinks.
 use crate::common;
 use common::board::{open, Board};
 use common::*;
@@ -20,7 +20,9 @@ fn pinned(s: &mut Board, rows: usize, what: &str) -> (usize, usize) {
     if rows >= 16 { assert_eq!(lines[head - 1].trim(), "", "{note}: an empty line sets the chat off from the list"); }
     for l in &lines[head..=last] { assert_ne!(l.trim(), "", "{note}: an empty line inside the chat block"); }
     let tasks = lines[..head].iter().filter(|l| l.contains("Task number")).count();
-    if rows >= 16 { assert!(tasks + 7 >= head, "{note}: {tasks} tasks in {head} lines"); } // the header, the filter row, the top row and its group
+    // the list's own rows above the tasks: the machine's row, its group, the line that counts the rest, the empty line
+    let list = s.s.list_at.unwrap().0;
+    if rows >= 16 { assert!(tasks + 4 >= head - list, "{note}: {tasks} tasks in {head} lines"); }
     (head, tasks)
 }
 

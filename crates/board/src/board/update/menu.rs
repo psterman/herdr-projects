@@ -50,6 +50,7 @@ pub fn label(s: &State, k: K, r: Option<&Obj>) -> String {
         K::ArchiveView => format!("{} the archive", if s.archive_view { "hide" } else { "show" }),
         K::ByRepo => if s.by_machine { "group by status".into() } else if s.by_repo { "group by machine: each machine's tasks under its name".into() } else { "group by repo: see which repo each task is in".into() },
         K::AllDone => if s.all_done { "hide the done tasks".into() } else { "show all done".into() },
+        K::TopPanel => if s.top_panel.menu.is_some() { "close the top panel's menu".into() } else { "the top panel: the charts it shows, and the menu that changes them".into() },
         K::Scope => {
             let to = if super::remotes::seeks(s) { "look for other machines".to_string() } else if next_scope.is_empty() { "show this machine's tasks only".to_string() } else if next_scope == "*" { "show every machine's tasks".into() } else { format!("show only {next_scope}'s tasks") };
             let now = if s.scope.is_empty() { "this machine".to_string() } else if s.scope == "*" { "every machine".into() } else { format!("only {}", s.scope) };

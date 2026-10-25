@@ -95,22 +95,22 @@ fn it_is_yours_only_a_hand_written_mistake_is_left_out_and_the_page_keeps_the_bu
 
 #[test]
 fn a_hand_written_chord_of_the_key_that_opens_the_board_does_not_count_on_the_board_either() {
-    let w = world_with(Opts { repo: true, settings: json!({ "board.keys": "menu=alt+g, side=alt+y" }), ..Default::default() });
+    let w = world_with(Opts { repo: true, settings: json!({ "board.keys": "menu=alt+z, side=alt+y" }), ..Default::default() });
     let conf = sw::extras::herdr_config();
     std::fs::create_dir_all(conf.parent().unwrap()).unwrap();
     let bind = |key: &str| std::fs::write(&conf, format!("[[keys.command]]\nkey = \"{key}\"\ntype = \"plugin_action\"\ncommand = \"herdr-projects.open\"\n")).unwrap();
-    bind("alt+g");
+    bind("alt+z");
     assert_eq!((key_name("menu"), key_name("side")), ("?".to_string(), "alt+y".to_string()));
-    assert!(!is(&Press::chord("alt+g"), K::Menu) && is(&Press::char('?'), K::Menu));
+    assert!(!is(&Press::chord("alt+z"), K::Menu) && is(&Press::char('?'), K::Menu));
     let mut s = open(&w.root, 34);
-    s.press(&["alt+g"]); assert!(s.s.menu.is_none(), "alt+g is the board's own key: the menu stays closed");
-    s.rows = 60; s.press(&["?"]); assert!(s.s.menu.is_some() && !s.text().contains("alt+g"), "{}", s.text());
+    s.press(&["alt+z"]); assert!(s.s.menu.is_none(), "alt+z is the board's own key: the menu stays closed");
+    s.rows = 60; s.press(&["?"]); assert!(s.s.menu.is_some() && !s.text().contains("alt+z"), "{}", s.text());
     let (_, shown) = settings_command("show", &["show".into()], &you(), None).unwrap();
-    assert!(shown.contains("board.keys: menu=alt+g: alt+g opens the board"), "{shown}");
+    assert!(shown.contains("board.keys: menu=alt+z: alt+z opens the board"), "{shown}");
     // Once the board opens on another key, the chord is yours.
     bind("prefix+a");
-    assert_eq!(key_name("menu"), "alt+g");
-    assert!(is(&Press::chord("alt+g"), K::Menu));
+    assert_eq!(key_name("menu"), "alt+z");
+    assert!(is(&Press::chord("alt+z"), K::Menu));
 }
 
 #[test]

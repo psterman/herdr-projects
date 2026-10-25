@@ -30,6 +30,7 @@ pub mod status;
 pub mod talk;
 pub mod talk_panel;
 pub mod textbox;
+pub mod top_panel;
 pub mod unfold;
 pub mod layout;
 pub use layout::{screen, Screen};

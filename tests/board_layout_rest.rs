@@ -1,6 +1,6 @@
 //! What the old board-layout test checked that tests/board_layout.rs does not: a longer message from the Coordinator
-//! grows the chat block upwards into the list, its lines in the one rounded box, and the block stays on the window's
-//! last line through a resize.
+//! grows the chat block upwards into the list, its lines in the one rounded box, and the block follows the list through a
+//! resize.
 use crate::common;
 use common::board::{open, Board};
 use common::*;
@@ -21,8 +21,9 @@ fn pinned(s: &mut Board, rows: usize, who: &str, what: &str) -> (usize, usize) {
     if rows >= 16 { assert_eq!(lines[head - 1].trim(), "", "{note}: an empty line sets the chat off from the list"); }
     for l in &lines[head..=last] { assert_ne!(l.trim(), "", "{note}: an empty line inside the chat block"); }
     let tasks = lines[..head].iter().filter(|l| l.contains("Task number")).count();
-    // the header, the filter row, the machine's row on top, its group, the line that counts the rest, the empty lines
-    if rows >= 16 { assert!(tasks + 7 >= head, "{note}: {tasks} tasks in {head} lines"); }
+    // the list's own rows above the tasks: the machine's row, its group, the line that counts the rest, the empty line
+    let list = s.s.list_at.unwrap().0;
+    if rows >= 16 { assert!(tasks + 4 >= head - list, "{note}: {tasks} tasks in {head} lines"); }
     (head, tasks)
 }
 

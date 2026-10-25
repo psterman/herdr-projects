@@ -53,9 +53,15 @@ fn list_part(s: &mut State, t: &Theme, w: usize, h: usize, screen_w: usize, abov
     super::guard::part(|| {
         let head = head_lines(s, t, w, h);
         for h in s.show_hits.iter_mut() { h.0 += above; }
-        s.list_at = Some((above + head.len(), w));
+        // The panel on top of the list: it takes at most half the room that is left, and the list keeps the rest.
+        let panel = super::top_panel::lines(s, w, h.saturating_sub(head.len()) / 2);
+        for h in s.top_panel.hits.iter_mut() { h.0 += above + head.len(); }
+        s.list_at = Some((above + head.len() + panel.len(), w));
         let mut v = head.clone();
-        v.extend(list_lines(s, t, w, h.saturating_sub(head.len()).max(1), screen_w));
+        v.extend(panel);
+        // The panel's menu stands where the list stands, and the panel above it follows every change.
+        if s.top_panel.menu.is_some() { v.extend(super::top_panel::menu::lines(s, t, w).into_iter().take(h.saturating_sub(v.len()))); }
+        else { v.extend(list_lines(s, t, w, h.saturating_sub(v.len()).max(1), screen_w)); }
         v
     }).unwrap_or_else(|why| { s.list_at = None; vec![failed(&format!("The list could not be shown: {why}"), w)] })
 }

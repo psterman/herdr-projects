@@ -86,7 +86,7 @@ fn a_terminal_held_at_another_size_the_board_draws_inside_what_is_shown_and_take
     assert!(has(&pin(&lines), r"55% 12m left {2}PR#3 {2}6m$"));
     // No key takes the terminal back: a chord that is not one of the board's disconnects nobody, on an empty text box
     // or in a draft.
-    let other = |s: &mut Board| update(&mut s.s, Event::Key(Press::chord("alt+g"))).into_iter().any(|e| matches!(e, Effect::Take { .. }));
+    let other = |s: &mut Board| update(&mut s.s, Event::Key(Press::chord("alt+z"))).into_iter().any(|e| matches!(e, Effect::Take { .. }));
     assert!(!other(&mut s)); assert_eq!(s.s.value(), "");
     s.typed("half a draft"); assert!(!other(&mut s)); assert_eq!(s.s.value(), "half a draft");
     s.s.input.set_text("");

@@ -1,8 +1,8 @@
 == the list
  herdr-projects  proj
  All 18   Coords 0   Needs 5   Working 9   Ready 1   To do 2   Done 1   Autos 0   Pinned 0
- ▾ this machine  1 project · 18 tasks
-   ▾ needs you
+ ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
    ? #9     Max length for task titles                                                            1m
             Should the old settings file be removed, or kept for one more version so that nobody lo…
    @ #10    Max length for task titles                                                            1m
@@ -32,28 +32,28 @@
 == the task beside it
  herdr-projects  proj                                       │
  All 18   Needs 5   Working 9   Ready 1   To do 2   Done 1  │  #5 Max length for task titles
-  ▾ needs you                                               │
-  ? #9     Max length for task titles                    1m │  Status ─────────────────────────────
-           Should the old settings file be removed, or kep… │  State        ◐ working · for 1m
-  @ #10    Max length for task titles                    1m │  Progress     █████░░░ 60% · 11m left
-           Needs a login                                    │  Now          Found the cause; now
-  ! #12    Max length for task titles    R#1 PR#123456   1m │               checking every caller
-           The pull request's checks fail                   │               of the resize handler
-  ✗ #13    Max length for task titles                    1m │               for the same mistake
-           Conflict with main                               │  On it        claude
-  ✗ #14    Max length for task titles                    1m │
-           Stopped without a summary                        │  Description ────────────────────────
-  ▾ ready to approve                                        │  A task title should have a maximum
-  ◆ #11    Max length for task titles    R#1 PR#60       1m │  length. A longer one is cut between
-           Pass                                             │  words.
-  ▾ working                                                 │  Second paragraph, with
-  ◐ #2     Max length for task titles                    1m │  a/very/long/path/that/has/no/space/i
-           Drafting                                         │  n/it/at/all/src/board/view/row-wrap.
-  ◇ #4     Max length for task titles                    1m │  js and more words after it.
-           Starting                                         │
-▌ ◐ #5     Max length for task titles                    1m │  Settings ───────────────────────────
-▌          Found the cause; now checking every caller of t… │  Reading its settings…
- ↓ 9 more                                                   │  alt+t shows the whole task
+ ████████████  needs you 5 · ready 1 · working 9 · to do 2  │
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new                                     │  Status ─────────────────────────────
+  @ #10    Max length for task titles                    1m │  State        ◐ working · for 1m
+           Needs a login                                    │  Progress     █████░░░ 60% · 11m left
+  ! #12    Max length for task titles    R#1 PR#123456   1m │  Now          Found the cause; now
+           The pull request's checks fail                   │               checking every caller
+  ✗ #13    Max length for task titles                    1m │               of the resize handler
+           Conflict with main                               │               for the same mistake
+  ✗ #14    Max length for task titles                    1m │  On it        claude
+           Stopped without a summary                        │
+  ▾ ready to approve                                        │  Description ────────────────────────
+  ◆ #11    Max length for task titles    R#1 PR#60       1m │  A task title should have a maximum
+           Pass                                             │  length. A longer one is cut between
+  ▾ working                                                 │  words.
+  ◐ #2     Max length for task titles                    1m │  Second paragraph, with
+           Drafting                                         │  a/very/long/path/that/has/no/space/i
+  ◇ #4     Max length for task titles                    1m │  n/it/at/all/src/board/view/row-wrap.
+           Starting                                         │  js and more words after it.
+▌ ◐ #5     Max length for task titles                    1m │
+▌          Found the cause; now checking every caller of t… │  Settings ───────────────────────────
+                                                            │  Reading its settings…
+ ↓ 9 more · ↑ 1 more                                        │  alt+t shows the whole task
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 ❯ Add a task
@@ -116,7 +116,7 @@
    ctrl+e       this task's settings: see and change each one
                 your own settings: what every task starts from
    ctrl+z       undo
- ↓ 38 more
+ ↓ 39 more
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
 ❯ Add a task
@@ -125,8 +125,8 @@
 == a draft
  herdr-projects  proj
  All 18   Coords 0   Needs 5   Working 9   Ready 1   To do 2   Done 1   Autos 0   Pinned 0
- ▾ this machine  1 project · 18 tasks
-   ▾ needs you
+ ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
+ ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
    ? #9     Max length for task titles                                                            1m
             Should the old settings file be removed, or kept for one more version so that nobody lo…
    @ #10    Max length for task titles                                                            1m

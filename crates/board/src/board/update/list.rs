@@ -47,6 +47,7 @@ pub fn relist(s: &mut State) {
     // The filter row counts every task in view; the list keeps those of the filter shown (shows.rs).
     let all = s.items.clone();
     s.show_n = super::shows::counts(s, &all);
+    s.top_panel.numbers = super::top_panel::numbers(&all);
     let keep: Vec<bool> = s.items.iter().map(|r| super::shows::keeps_task(s, r)).collect();
     let mut keep = keep.into_iter();
     s.items.retain(|_| keep.next().unwrap_or(true));

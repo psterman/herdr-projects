@@ -92,6 +92,26 @@ pub struct Pending { pub word: String, pub fail: String, pub at: i64, pub was: S
 /// A size somebody else holds the board's terminal at (held.rs), as last seen.
 #[derive(Clone, Debug, Default)]
 pub struct Held { pub columns: u16, pub rows: u16, pub room: (u16, u16), pub by: Vec<(i64, i64)>, pub known: bool }
+/// The top panel's numbers, counted when the list is (update/top_panel.rs): a day of new tasks and of finished ones
+/// (oldest first), what waits for you and since when, and the running tasks' use of their caps.
+#[derive(Clone, Debug, Default)]
+pub struct Numbers { pub days: Vec<(usize, usize)>, pub waiting: (usize, i64), pub caps: Caps }
+/// What the running tasks have used of their caps: the most used of them, the cap it was, and how many are near theirs.
+#[derive(Clone, Debug, Default)]
+pub struct Caps { pub share: f64, pub cap: String, pub near: usize }
+/// The top panel's menu: the charts as they stand while it is open (each with its mark), and the one that is picked.
+#[derive(Clone, Debug, Default)]
+pub struct TopMenu { pub at: usize, pub charts: Vec<(String, bool)> }
+impl TopMenu {
+    /// The charts that are on, in the order they are drawn.
+    pub fn on(&self) -> Vec<&'static str> { self.charts.iter().filter(|(_, on)| *on).filter_map(|(id, _)| crate::board::top_panel::chart(id)).map(|(id, ..)| id).collect() }
+    /// The charts that are on, as the setting says them.
+    pub fn said(&self) -> Vec<String> { self.on().into_iter().map(String::from).collect() }
+}
+/// The top panel on top of the list (view/top_panel/): the numbers its charts are drawn from, where each of them was
+/// drawn (for a click), and its menu while it is open.
+#[derive(Clone, Debug, Default)]
+pub struct TopPanel { pub numbers: Numbers, pub hits: Vec<(usize, usize, usize, usize)>, pub menu: Option<TopMenu> }
 
 /// The web board's own (webui/web.rs): the agent page to go to (`going`: one held, with when, until the web UI shows
 /// that pane: webui/going.rs), how often the settings part was asked for, the messages
@@ -129,6 +149,9 @@ pub struct State {
     /// The filter row on top (update/shows.rs): which one shows, by its place (0 all); where each was drawn, for a
     /// click (line, first and last cell, which); grouped by machine, the third way alt+s groups the list.
     pub show: usize, pub show_n: Vec<usize>, pub show_hits: Vec<(usize, usize, usize, usize)>, pub by_machine: bool,
+    /// The top panel on top of the list (view/top_panel/): the numbers its charts are drawn from, where each of them
+    /// was drawn (for a click), and its menu while it is open.
+    pub top_panel: TopPanel,
     pub filter: String, pub msg: String, pub msg_kind: Ink,
     /// The chat: open on the conversation's end, folded to its head line, or on its own with nothing around it (the
     /// conversation's own view, `board.view`); what you sent it and what came of it, where its message stands, and
@@ -178,6 +201,7 @@ impl State {
             all_done: false, archive_view: false, archive_back: None, archive_undo: None, reply: false, reply_id: String::new(),
             side: false, full: false, panel_top: 0, panel_height: 1, panel_length: 0, width: 120,
             mode: Mode::New, menu: None, ask: None, by_repo: false, draft_away: None, auto_open: false, auto_at: -1, folded: Default::default(), scope: String::new(), show: 0, show_n: vec![], show_hits: vec![], by_machine: false,
+            top_panel: TopPanel::default(),
             filter: String::new(), msg: String::new(), msg_kind: Ink::Muted, chat_open: true, chat_folded: false, chat_whole: crate::board::chat_view::is_chat(), just_sent: HashMap::new(), chat_at: None, chat_fit: None, chat_rows: None,
             input: TextBox::default(), skill_at: (String::new(), 0), skill_closed: String::new(), editing: None, edit_line: 0, setup: None, paste_text: String::new(), paste_at: 0, paste_more: 0, paste_room: 1, closing: None, leaving: false, leave_at: 0,
             attempt_at: HashMap::new(), pending: HashMap::new(), list_room: 0, list_tall: false, list_width: 0, fold_sel: String::new(), unread_top: 0, unread_max: 0, list_at: None, list_ids: vec![],

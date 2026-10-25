@@ -48,6 +48,7 @@ pub mod board {
     pub mod remap;
     pub mod status_line;
     pub mod theme;
+    pub mod top_panel;
 }
 /// What of the web UI the flow and the board's screen use: where the web UI is, its PCs, its link, and the
 /// front door started from outside. sw-web's `webui` module passes them on beside the web board itself.

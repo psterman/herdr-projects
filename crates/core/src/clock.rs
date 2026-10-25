@@ -28,3 +28,12 @@ pub fn meanwhile(f: impl FnMut() + 'static) { MEANWHILE.with(|m| *m.borrow_mut()
 pub fn iso(ms: i64) -> String { chrono::DateTime::from_timestamp_millis(ms).map(|d| d.format("%Y-%m-%dT%H:%M:%S%.3fZ").to_string()).unwrap_or_default() }
 /// The time of day where it is: "15:04", in the machine's own timezone.
 pub fn hm(ms: i64) -> String { chrono::DateTime::from_timestamp_millis(ms).map(|d| d.with_timezone(&chrono::Local).format("%H:%M").to_string()).unwrap_or_default() }
+/// The day a moment falls in, as the days since the epoch in the machine's own timezone: two moments of one day are
+/// equal, and the day before is one less.
+pub fn day(ms: i64) -> i64 {
+    use chrono::Datelike;
+    chrono::DateTime::from_timestamp_millis(ms).map(|d| {
+        let day = d.with_timezone(&chrono::Local).date_naive();
+        day.num_days_from_ce() as i64 - 719_163
+    }).unwrap_or(0)
+}
