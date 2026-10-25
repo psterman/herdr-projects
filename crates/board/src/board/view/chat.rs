@@ -3,7 +3,6 @@
 //! name, a greyed line on where they stand, the message.
 use super::fields::{fields, mark};
 use super::talk::{coord_talk, opens_at, talk, with_mine, Part};
-use crate::board::keys::key_name;
 use crate::board::state::{ChatAt, ChatFit, Mode, State};
 use crate::board::tags::number_tag;
 use crate::board::theme::Theme;
@@ -190,11 +189,11 @@ fn same_chat(s: &mut State) {
     let key = if s.reply { format!("task {}", s.sel) } else { coord_name(s) };
     if s.chat_at.as_ref().map(|a| a.key != key).unwrap_or(true) { s.chat_at = Some(ChatAt { key, ..Default::default() }); }
 }
-/// The words on the box that say the message goes on, with the key that shows it, in `room` columns.
+/// The words on the box that say the message goes on, in `room` columns: `more ↑`, or only the arrow. The key that
+/// scrolls it is named in the menu, not here.
 pub fn more_word(up: bool, room: usize) -> Inked {
     let arrow = if up { "↑" } else { "↓" };
-    let key = key_name(if up { "chatScrollUp" } else { "chatScrollDown" });
-    [format!("{key} more {arrow}"), format!("more {arrow}"), arrow.to_string()].into_iter().find(|w| crate::text::width(w) <= room).map(|w| Inked::of(w, Ink::Muted)).unwrap_or_default()
+    [format!("more {arrow}"), arrow.to_string()].into_iter().find(|w| crate::text::width(w) <= room).map(|w| Inked::of(w, Ink::Muted)).unwrap_or_default()
 }
 /// The task panel leaves "The agent said" to the chat while the chat shows that same message.
 pub fn chat_shows(s: &mut State, r: &Obj) -> bool { s.reply && s.chat_open && !s.chat_folded && s.mode != Mode::Find && r.s("id") == s.sel && !r.b("archivedAt") && has_agent(r) && sent_to(s, r).is_empty() }

@@ -614,7 +614,7 @@ are sent from another machine, so a count would not be true). All of that is in 
 It looks the same for a coordinator and for a task's agent, at every window width:
 
 ```
-╭─ All machines ›  vm-str  ─────────────────────────────────────────────── alt+k more ↑ ─╮
+╭─ All machines ›  vm-str  ───────────────────────────────────────────────────────── more ↑ ─╮
 │ Added proj/4: Add an undo. An agent is on it.                                              │
 │                                                                                            │
 │ ❯ Send message to vm-str's coordinator                                                     │
@@ -732,15 +732,15 @@ The box opens on the newest thing said, and holds only that. What came before is
   findings, the word to go on). A long text sent, such as a brief, shows only its beginning.
 - The mouse wheel does the same with the pointer over the chat ([the mouse](mouse.md)). Both work while you type, and
   neither touches the draft.
-- The box says where there is more and names the key: `alt+k more ↑` on its top edge, `alt+j more ↓` at the right of the
-  line under the message (in a narrow window only `more ↓`, then only the arrow).
+- The box says where there is more: `more ↑` on its top edge, `more ↓` at the right of the
+  line under the message (in a narrow window only the arrow). The keys that scroll it are in the menu.
 
 ```
  ● Coordinator  idle
-╭───────────────────────────────────────────────────────────────────────────── alt+k more ↑ ─╮
+╭─────────────────────────────────────────────────────────────────────────────────── more ↑ ─╮
 │ 3. The check fails on main too: it is not this task's change.                              │
 │ 4. I filed proj/7 for it and put an agent on it.                                           │
-│                                                                               alt+j more ↓ │
+│                                                                                     more ↓ │
 │ ❯ Send message to vm-str's coordinator                                                     │
 ╰────────────────────────────────────────────────────────────────────────────────────────────╯
 ```

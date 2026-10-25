@@ -6,7 +6,6 @@ use common::board::{open, Board};
 use common::*;
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use serde_json::json;
-use sw::board::keys::key_name;
 use sw::board::theme::Theme;
 use sw::json::*;
 use sw::shown::ink::Ink;
@@ -36,7 +35,7 @@ fn a_long_message_wraps_inside_the_box_and_takes_the_rows_it_needs_never_the_tex
     for width in [44, 80, 200] {
         let c = crate::board_chat::chat(&mut s, width);
         let body = &c.boxed[..c.boxed.len() - 2];
-        assert!(has(&c.boxed[c.boxed.len() - 2], &format!(r"^ +({} )?more ↓$", regex::escape(&key_name("chatScrollDown")))), "{:?}", c.boxed);
+        assert!(has(&c.boxed[c.boxed.len() - 2], r"^ +more ↓$"), "{:?}", c.boxed);
         assert!(c.boxed.last().unwrap().starts_with("❯ Send message to "), "{:?}", c.boxed);
         // With its box it takes two thirds of the 30 rows: 14 lines of it (the box's empty rows take two), under the
         // box's edge, which names who it is. It starts at its beginning, under no label: the edge says whose it is.

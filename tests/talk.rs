@@ -196,7 +196,6 @@ fn a_hermes_conversation_is_read_from_the_store_it_keeps() {
 
 use crate::common;
 use common::*;
-use sw::board::keys::key_name;
 use sw::json::*;
 
 fn chat_box(s: &mut common::board::Board) -> (String, Vec<String>) { let c = crate::board_chat::chat(s, 120); let lines = s.screen(120); let top = lines.iter().rposition(|l| l.starts_with("╭─")).unwrap(); (lines[top].clone(), c.boxed) }
@@ -228,7 +227,7 @@ fn a_review_under_way_shows_what_the_reviewer_says_never_its_screen_and_a_workin
     s.load();
     let (edge, b) = chat_box(&mut s);
     assert_eq!(b, vec!["Board:", "Work board task proj/1, role: reviewer, round 1.", "You are an adversarial reviewer.", "", "Reviewer:", "I will check the earlier faults first.", "", "Reviewer:", "The full check passes. Now the browser.", "", "❯ Send message to the agent: the review goes on unless the code changes"]);
-    assert!(!edge.contains(&format!("{} more ↑", key_name("chatScrollUp"))), "the whole conversation fits the box: {edge}");
+    assert!(!edge.contains("more ↑"), "the whole conversation fits the box: {edge}");
     assert!(!regex::Regex::new("Bash|npm run check|76 test files|OpenAI Codex").unwrap().is_match(&s.text()));
     s.press(&["alt+k"]);
     let (_, b) = chat_box(&mut s);

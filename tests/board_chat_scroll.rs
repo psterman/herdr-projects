@@ -4,7 +4,6 @@
 use crate::common;
 use common::board::{open, Board};
 use common::*;
-use sw::board::keys::key_name;
 use sw::json::*;
 
 fn has(text: &str, re: &str) -> bool { regex::Regex::new(re).unwrap().is_match(text) }
@@ -85,16 +84,16 @@ fn the_chats_box_grows_with_the_answer_up_to_two_thirds_of_the_window_and_shrink
 #[test]
 fn alt_k_and_alt_j_scroll_a_message_longer_than_its_box_with_a_draft_too_the_box_says_where_there_is_more_a_new_message_keeps_the_place() {
     let mut b = B::new(33, 30);
-    let (up, down) = (regex::escape(&key_name("chatScrollUp")), regex::escape(&key_name("chatScrollDown")));
-    // The box names the key where there is more: under the message at first, on its top edge too once scrolled.
+    // The box says where there is more, without naming the key: under the message at first, on its top edge too once
+    // scrolled.
     let c = b.chat(120);
-    assert!(has(&c.lines[c.top], "^╭─[^\n]*╮$")); assert!(has(&c.lines[c.end - 3], &format!(" {down} more ↓  │$")), "{}", c.lines[c.end - 3]);
+    assert!(has(&c.lines[c.top], "^╭─[^\n]*╮$")); assert!(has(&c.lines[c.end - 3], " more ↓  │$"), "{}", c.lines[c.end - 3]);
     // Down half a box at a time, to the end and no further.
     b.key(&["alt+j"]); let c = b.chat(120);
     assert_eq!(c.message[0], "Line 9 of the answer."); assert!(c.up && c.down);
-    assert!(has(&c.lines[c.top], &format!("^╭─.* {up} more ↑ ─?╮$")), "{}", c.lines[c.top]);
+    assert!(has(&c.lines[c.top], "^╭─.* more ↑ ─?╮$"), "{}", c.lines[c.top]);
     let edge = |b: &mut B, w: usize| b.chat(w).lines.into_iter().find(|l| l.contains('↑')).unwrap();
-    assert!(has(&edge(&mut b, 40), &format!("^╭─.* {up} more ↑ ─?╮$"))); assert!(has(&edge(&mut b, 14), "^╭─.* more ↑ ─?╮$"), "{}", edge(&mut b, 14)); assert!(has(&edge(&mut b, 9), "^╭─.*↑ ─?╮$"), "{}", edge(&mut b, 9));
+    assert!(has(&edge(&mut b, 40), "^╭─.* more ↑ ─?╮$")); assert!(has(&edge(&mut b, 14), "^╭─.* more ↑ ─?╮$"), "{}", edge(&mut b, 14)); assert!(has(&edge(&mut b, 9), "^╭─.*↑ ─?╮$"), "{}", edge(&mut b, 9));
     b.key(&["alt+j", "alt+j", "alt+j", "alt+j"]); let c = b.chat(120);
     assert_eq!(c.message.last().unwrap(), "Line 40 of the answer."); assert_eq!(c.message.len(), 16); assert!(c.up && !c.down);
     // alt+u no longer scrolls it (alt+k pairs with alt+j), and types nothing.
@@ -107,7 +106,7 @@ fn alt_k_and_alt_j_scroll_a_message_longer_than_its_box_with_a_draft_too_the_box
     let sel = b.b.s.sel.clone(); b.key(&["alt+j"]); assert_eq!(b.b.s.sel, sel); assert_eq!(b.b.s.value(), "");
     // With a draft in the text box the two keys still scroll, the box still names them, and the draft is whole.
     b.apply(); b.b.typed("my draft"); let c = b.chat(120);
-    assert!(has(&c.lines[c.top], &format!(" {up} more ↑ ─?╮$")), "{}", c.lines[c.top]);
+    assert!(has(&c.lines[c.top], " more ↑ ─?╮$"), "{}", c.lines[c.top]);
     b.key(&["alt+j"]); let c = b.chat(120);
     assert_eq!(c.message[0], "Line 17 of the answer."); assert_eq!(b.b.s.value(), "my draft"); assert!(has(&c.draft.join(" "), "❯ my draft"));
     b.key(&["alt+k", "alt+k", "alt+k"]); assert_eq!(b.b.s.value(), "my draft"); assert_eq!(b.first(), "Line 1 of the answer.");
