@@ -4,23 +4,31 @@ use crate::json::*;
 use crate::shown::ink::{Ink, Inked};
 
 /// The line at the bottom: the agent the chat talks to and how it stands, what the board holds, the time. What does not
-/// fit is let go, the least telling first, so the model, the state and the time are always there.
+/// fit is let go, the least telling first: the model's name, then the counts, so the agent, the state and the time are
+/// always there.
 pub fn status_line(s: &State, width: usize) -> Inked {
     let room = width.saturating_sub(2);
-    let model = model_of(s);
     let state = state_of(s);
     let clock = crate::clock::hm(crate::clock::now());
     let mut counts = counts_of(s);
     loop {
-        let mut parts: Vec<String> = vec![];
-        if !model.is_empty() { parts.push(model.clone()); }
-        if !state.is_empty() { parts.push(state.clone()); }
-        parts.extend(counts.iter().cloned());
-        parts.push(clock.clone());
-        let text = parts.join(" · ");
-        if crate::text::width(&text) <= room || counts.is_empty() { return Inked::plain("  ").add(Inked::of(text, Ink::Muted)).cut(width); }
-        counts.pop();
+        let text = line(&model_of(s), &state, &counts, &clock);
+        if crate::text::width(&text) <= room { return Inked::plain("  ").add(Inked::of(text, Ink::Muted)); }
+        if !counts.is_empty() { counts.pop(); continue; }
+        // The model's name goes: what it is called, what it does and the time stay.
+        let text = line(&kind_of(s), &state, &counts, &clock);
+        if crate::text::width(&text) <= room { return Inked::plain("  ").add(Inked::of(text, Ink::Muted)); }
+        return Inked::plain("  ").add(Inked::of(text, Ink::Muted)).cut(width);
     }
+}
+/// The line's parts, joined by a dot.
+fn line(model: &str, state: &str, counts: &[String], clock: &str) -> String {
+    let mut parts: Vec<String> = vec![];
+    if !model.is_empty() { parts.push(model.to_string()); }
+    if !state.is_empty() { parts.push(state.to_string()); }
+    parts.extend(counts.iter().cloned());
+    parts.push(clock.to_string());
+    parts.join(" · ")
 }
 /// The program and the model the chat talks to, as the board writes them.
 fn model_of(s: &State) -> String {
@@ -28,6 +36,10 @@ fn model_of(s: &State) -> String {
     let kind = k.s("kind");
     if kind.is_empty() { return String::new(); }
     if k.b("model") { format!("{kind} · {}", k.s("model")) } else { kind.to_string() }
+}
+/// The program the chat talks to, without the model's name.
+fn kind_of(s: &State) -> String {
+    s.data.coord.run.as_ref().or(s.data.coord.def.as_ref()).map(|k| k.s("kind").to_string()).unwrap_or_default()
 }
 /// How it stands, in one word.
 fn state_of(s: &State) -> String {

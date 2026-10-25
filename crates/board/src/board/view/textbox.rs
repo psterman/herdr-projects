@@ -75,7 +75,8 @@ pub fn chat_box(s: &mut State, width: usize, max_rows: usize, r: Option<&Obj>, m
     let body: Vec<Inked> = b[1..b.len() - 1].to_vec();
     let (above, below) = (s.input.above, s.input.below);
     let fit = if message.is_empty() { None } else { s.chat_fit.clone() };
-    let up = fit.as_ref().filter(|f| f.above > 0).map(|_| more_word(true, width.saturating_sub(6))).unwrap_or_default();
+    let more_above = fit.as_ref().map(|f| f.above > 0).unwrap_or(false);
+    let up = if more_above { more_word(true, width.saturating_sub(6)) } else { Inked::new() };
     let down = fit.as_ref().filter(|f| f.below > 0).map(|_| more_word(false, inner)).unwrap_or_default();
     let line = |n: usize| edge(&"─".repeat(n));
     let title = super::chat_title::title(s, r);
@@ -85,7 +86,7 @@ pub fn chat_box(s: &mut State, width: usize, max_rows: usize, r: Option<&Obj>, m
     let gap = inner.saturating_sub(down.width() + if down.is_empty() { 0 } else { 1 });
     let under = if above > 0 { edge(&s.input.rule(gap, true)) } else { Inked::spaces(if down.is_empty() { 0 } else { gap }) }.add(if down.is_empty() { Inked::new() } else { Inked::plain(" ").add(down) });
     // Its top edge names who it talks to (chat_title.rs).
-    let mut out = match &title { Some(t) if !(above > 0 && message.is_empty()) => vec![super::chat_title::edge(t, width, up)], _ => vec![edge("╭").add(top).add(edge("╮"))] };
+    let mut out = match &title { Some(t) if !(above > 0 && message.is_empty()) => vec![super::chat_title::edge(t, width, more_above)], _ => vec![edge("╭").add(top).add(edge("╮"))] };
     // Room to breathe: an empty line under the top edge and over the bottom one (none where height is short).
     if airy { out.push(row(&Inked::new())); }
     out.extend(message.iter().map(row));

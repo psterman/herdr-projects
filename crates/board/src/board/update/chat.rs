@@ -82,13 +82,16 @@ pub fn sync_coord(s: &mut State, fx: &mut Vec<Effect>) {
 /// of a message scrolled through) closes it to the conversation's end, the newest thing said last. Nothing but what
 /// shows changes: the place is yours now (view/chat_keep.rs).
 pub fn scroll(s: &mut State, by: i64) -> bool {
+    let narrow_pane = crate::board::view::chat::narrow(s);
     let (Some(f), Some(at)) = (s.chat_fit.clone(), s.chat_at.as_mut()) else { return false };
-    let last = f.total.saturating_sub(f.rows);
+    // A narrow pane's box ends at the newest thing said alone; a wide one's at the end of the conversation.
+    let narrow = narrow_pane && f.total - f.latest <= f.rows;
+    let last = if narrow { f.latest } else { f.total.saturating_sub(f.rows) };
     if by > 0 && f.top >= last && at.top.is_some() { at.top = None; return true; }
-    if f.total <= f.rows { return false; }
+    if last == 0 { return false; }
     let top = (f.top as i64 + by).clamp(0, last as i64) as usize;
-    at.top = Some(top); at.end = top >= last;
-    if let Some(f) = s.chat_fit.as_mut() { f.top = top; f.above = top; f.below = last - top; }
+    at.top = Some(top); at.end = top >= f.total.saturating_sub(f.rows);
+    if let Some(f) = s.chat_fit.as_mut() { f.top = top; f.above = top; f.below = f.total.saturating_sub(top + f.rows); }
     true
 }
 /// How far a key scrolls: half of what shows, so the line you were reading stays in view.

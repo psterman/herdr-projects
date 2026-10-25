@@ -16,6 +16,9 @@ use crate::status_words::{coordinator_stands, coordinator_status, COORDINATOR_UN
 
 /// The fewest cells the status keeps when the progress stands beside it.
 const CHAT_STATUS_MIN: usize = 20;
+/// The fewest cells the box's inside needs to read a turn in: below this, a turn takes so many lines that the box would
+/// be full of fragments, so it holds the newest one alone, and the turns above it are read with the scroll up.
+const NARROW: usize = 30;
 /// `tint`: the colour of what a machine's or a repo's coordinator belongs to, its heading's (update/coords.rs), on its
 /// name over the box (never inside it); Plain for the Coordinator and a task's agent.
 #[derive(Clone, Debug, Default)]
@@ -156,23 +159,32 @@ pub fn chat_message(s: &mut State, c: Option<&Who>, width: usize, max: usize) ->
     lines.into_iter().skip(top).take(rows).collect()
 }
 /// Which lines of a conversation show: the box holds the newest thing said (from `latest`) and the turns above it that
-/// fit; a newest thing longer than the box takes all of it, and the rest of it is read with the scroll down. The first
-/// scroll up opens it to the conversation above. Only a screen starts at its end. Opened, it stays open for as long as
-/// you talk to the same one, whatever they say meanwhile: on the lines you read, or on the end when you were there
-/// (chat_keep.rs). Down once more from its end, hiding the chat, or talking to another closes it.
+/// fit; a newest thing longer than the box takes all of it, and the rest of it is read with the scroll down. In a pane
+/// too narrow to read a turn, it holds the newest thing said alone. The first scroll up opens it to the conversation
+/// above. Only a screen starts at its end. Opened, it stays open for as long as you talk to the same one, whatever they
+/// say meanwhile: on the lines you read, or on the end when you were there (chat_keep.rs). Down once more from its end,
+/// hiding the chat, or talking to another closes it.
 pub fn chat_window(s: &mut State, c: &Who, lines: &[String], max: usize, latest: usize) -> usize {
     let total = lines.len();
     same_chat(s);
+    let narrow_pane = narrow(s);
     let at = s.chat_at.get_or_insert_with(Default::default);
     let rows = max.min(total).max(1);
-    let last = total.saturating_sub(rows);
-    // The newest thing said, from its start; and above it the turns that fit, so that the box is a conversation and not
-    // one message. A newest thing too long for the box takes it all: the rest of it is read with the scroll down.
-    let top = if at.top.is_some() { super::chat_keep::kept(at, lines, last) } else if c.raw { last } else if total - latest <= rows { last } else { latest };
-    if at.top.is_some() { at.top = Some(top); at.lines = lines.to_vec(); at.end = top >= last; }
-    s.chat_fit = Some(ChatFit { total, rows, top, above: top, below: last - top, latest });
+    // The top the conversation ends at, its last lines in the box: the end of it in a wide pane, the newest thing said
+    // alone in a narrow one.
+    let wide = total.saturating_sub(rows);
+    // A narrow pane holds the newest thing said alone: a turn would take so many lines there that the box would be full
+    // of fragments. The turns above it are read with the scroll up.
+    let narrow = narrow_pane && !c.raw && total - latest <= rows;
+    let last = if narrow { latest } else { wide };
+    let top = if at.top.is_some() { super::chat_keep::kept(at, lines, last) } else if c.raw { wide } else if narrow { latest } else if total - latest <= rows { wide } else { latest };
+    // The window reaches the end of the conversation when its last line is the last line said.
+    if at.top.is_some() { at.top = Some(top); at.lines = lines.to_vec(); at.end = top >= wide; }
+    s.chat_fit = Some(ChatFit { total, rows, top, above: top, below: total.saturating_sub(top + rows), latest });
     top
 }
+/// Whether the pane is too narrow to read a whole turn in: the box holds the newest thing said alone there.
+pub fn narrow(s: &State) -> bool { super::textbox::inner_width(s.width) < NARROW }
 /// Talking to another (even one with nothing to show yet) starts its chat closed.
 fn same_chat(s: &mut State) {
     let key = if s.reply { format!("task {}", s.sel) } else { coord_name(s) };

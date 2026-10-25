@@ -22,7 +22,14 @@ fn v(a: &[&str]) -> Vec<String> { a.iter().map(|s| s.to_string()).collect() }
 /// The chat as the screen shows it, now that the box's own title says who it talks to (view/chat_title.rs): `who` is
 /// the box's first line (whose it is and what it looks after), `boxed` what is under it, `framed` whether it shows a
 /// message. A box with no title (find, or no coordinator and no task talked to) reads as before.
-pub fn chat(s: &mut common::board::Board, cols: usize) -> common::board::Chat { roomy(s.chat(cols), cols) }
+pub fn chat(s: &mut common::board::Board, cols: usize) -> common::board::Chat {
+    let mut c = s.chat(cols);
+    // The box is the chat's own while the chat is open; hidden, it is the box that takes a message and nothing else.
+    let framed = c.framed;
+    if framed { c = roomy(c, cols); }
+    c.framed = framed && s.s.chat_open;
+    c
+}
 /// The box as its content: without the room to breathe it has (view/textbox.rs: chat_box): the empty row under its top
 /// edge and over its bottom one, and the second cell of padding on the left of a box 30 or more columns wide.
 pub fn roomy(mut c: common::board::Chat, cols: usize) -> common::board::Chat {
@@ -33,7 +40,6 @@ pub fn roomy(mut c: common::board::Chat, cols: usize) -> common::board::Chat {
     // Who it talks to is the ladder in the box's top edge (its steps, the lit one last); inside, only the reply.
     // After the lit step, the kind of agent (` · Project coordinator`): kept apart (`chat_kind`).
     c.who = c.lines[t].trim_start_matches(['╭', '─']).trim_end_matches('╮').trim_end_matches(['─', ' ']).split(" ─").next().unwrap_or("").split(" · ").next().unwrap_or("").split_whitespace().collect::<Vec<_>>().join(" ");
-    if c.boxed.first().is_some_and(|l| l.starts_with('❯')) { c.framed = false; }
     c
 }
 /// The kind of agent the box's top edge names after its lit step (`Agent`, `Project coordinator`), "" none.
