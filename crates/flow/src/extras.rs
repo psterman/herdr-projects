@@ -8,6 +8,7 @@
 //! `remove-extras` takes all of it out again. The plugin never edits a file, a block or a link it did not write.
 pub mod config;
 pub mod found;
+pub mod key;
 pub mod skill_text;
 pub use config::{add_block, block_text, board_key, board_presses, check_key, herdr_config, offers, refresh_sidebar, remove_blocks, remove_popups};
 

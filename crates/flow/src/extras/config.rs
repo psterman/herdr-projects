@@ -15,8 +15,8 @@ pub fn herdr_config() -> PathBuf {
     let base = std::env::var("XDG_CONFIG_HOME").map(PathBuf::from).unwrap_or_else(|_| crate::store::files::user_home().join(".config"));
     base.join("herdr").join("config.toml")
 }
-fn begin(what: &str) -> String { format!("# >>> herdr-projects {what} (added by the herdr-projects plugin; `herdr-projects remove-extras` removes it)") }
-fn end(what: &str) -> String { format!("# <<< herdr-projects {what}") }
+pub(super) fn begin(what: &str) -> String { format!("# >>> herdr-projects {what} (added by the herdr-projects plugin; `herdr-projects remove-extras` removes it)") }
+pub(super) fn end(what: &str) -> String { format!("# <<< herdr-projects {what}") }
 fn block(what: &str, arg: &str) -> String {
     match what {
         "key" => format!("[[keys.command]]\nkey = \"{arg}\"\ntype = \"plugin_action\"\ncommand = \"herdr-projects.open\"\ndescription = \"work board\""),
@@ -27,7 +27,7 @@ fn block(what: &str, arg: &str) -> String {
     }
 }
 pub fn block_text(what: &str, arg: &str) -> String { format!("{}\n{}\n{}", begin(what), block(what, arg), end(what)) }
-fn read() -> String { std::fs::read_to_string(herdr_config()).unwrap_or_default() }
+pub(super) fn read() -> String { std::fs::read_to_string(herdr_config()).unwrap_or_default() }
 fn is_link() -> bool { std::fs::symlink_metadata(herdr_config()).map(|m| m.file_type().is_symlink()).unwrap_or(false) }
 fn herdr_out(a: &[&str], env: Option<(&str, String)>) -> Option<(i32, String)> {
     if let Some(f) = crate::herdr::cli::fake() { let r = f.run(&a.iter().map(|x| x.to_string()).collect::<Vec<_>>(), ""); return Some((r.status, format!("{}{}", r.stdout, if r.stdout.is_empty() { r.stderr } else { String::new() }))); }
@@ -62,7 +62,7 @@ pub fn board_presses() -> Option<(Vec<String>, String)> { keys::presses(&board_k
 /// May the board take this key? Asked as soon as one is typed at the first run, and again before it is written.
 pub fn check_key(key: &str) -> Result<(), String> { keys::check(key, &read(), &keys::defaults(), &tilde(&herdr_config().display().to_string())) }
 /// Would herdr take this config? Asked of a copy, never of the real file. Yes when herdr cannot be asked.
-fn accepted(text: &str) -> Result<(), String> {
+pub(super) fn accepted(text: &str) -> Result<(), String> {
     let cand = data_dir().join(format!("config-candidate-{}.toml", std::process::id()));
     let _ = std::fs::create_dir_all(data_dir());
     if std::fs::write(&cand, text).is_err() { return Ok(()); }
@@ -70,7 +70,7 @@ fn accepted(text: &str) -> Result<(), String> {
     let _ = std::fs::remove_file(&cand);
     match r { None => Ok(()), Some((0, out)) if out.to_lowercase().contains("ok") => Ok(()), Some((_, out)) => Err(one_line(&out, 300)) }
 }
-fn reload() -> (String, String) {
+pub(super) fn reload() -> (String, String) {
     let Some((code, out)) = herdr_out(&["server", "reload-config"], None) else { return ("unknown".into(), "herdr did not answer".into()) };
     match serde_json::from_str::<Value>(&out) {
         Ok(j) => { let r = j.at("result"); (r.t("status"), strings(r.at("diagnostics")).join("; ")) }

@@ -130,10 +130,21 @@ fn set_mine(name: &str, value: Option<String>, repo: &str) -> crate::err::Res<Do
     use crate::actions::settings::{settings_command, Where};
     let cmd = if value.is_some() { "set" } else { "unset" };
     let w = Where { task: None, repo: (!repo.is_empty()).then(|| repo.to_string()), automation: None, coord: None };
-    let (j, _) = settings_command(cmd, &[cmd.to_string(), name.to_string()], &w, value.map(|v| json!(v)))?;
+    let (j, _) = settings_command(cmd, &[cmd.to_string(), name.to_string()], &w, value.clone().map(|v| json!(v)))?;
     let label = entry_of(name).map(|e| e.label.to_string()).unwrap_or_else(|| name.to_string());
     let shown = match j.at("value") { Value::Bool(true) => "on".to_string(), Value::Bool(false) => "off".to_string(), v => say(v).lines().next().unwrap_or("").to_string() };
     let note = if j.s("note").is_empty() { String::new() } else { format!(" · {}", j.s("note")) };
+    // The key that opens the board is a key in herdr's own config: it is written there, and herdr is told to reload.
+    if name == crate::extras::key::BOARD_KEY {
+        let chord = value.unwrap_or_default().trim().to_string();
+        if chord.is_empty() || chord == crate::store::settings::values::NONE {
+            return Ok(Done::say(format!("{label}: {shown}{note} · herdr's own key for the board is left as it is"), Ink::Green).and(Then::Saved(name.to_string())));
+        }
+        return match crate::extras::key::set(&chord) {
+            Ok(said) => Ok(Done::say(format!("{label}: {shown}{note} · {said}"), Ink::Green).and(Then::Saved(name.to_string()))),
+            Err(why) => Ok(Done::say(format!("{label}: {shown}{note} · {why}"), Ink::Red)),
+        };
+    }
     Ok(Done::say(format!("{label}: {shown}{note}"), Ink::Green).and(Then::Saved(name.to_string())))
 }
 /// Into a task's agent: its real herdr pane. Its space may have been closed (archive closes it): it is reopened from

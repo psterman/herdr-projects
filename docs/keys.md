@@ -83,6 +83,18 @@ It is Herdr's, not the board's: a line in Herdr's `config.toml`, offered at the 
 The board never takes a key Herdr binds itself (`prefix+w` is Herdr's workspace picker) or one your config already binds:
 it refuses it and says what the key does today.
 
+**You can give it one key press of its own**, so that the board is a single keystroke away instead of Herdr's prefix
+and one more:
+
+```
+herdr-projects set board.key alt+b
+```
+
+Any chord Herdr does not use is taken (`none` leaves Herdr's own binding as it is). The line is written into Herdr's
+`config.toml` in the plugin's own block, the file is checked on a copy before it is written, your old file is kept as
+`config.toml.bak-herdr-projects`, and Herdr is told to reload. A key Herdr or your config already uses is refused, with
+what that key does today, and nothing is written.
+
 Pressed again, the board key takes you back: from the board in its tab, to the pane you came from; with `board.open` set
 to `popup`, it closes the popup ([the board](board.md)). Herdr gives a popup every key, so there the board reads that key
 itself, from Herdr's `config.toml`: Herdr's prefix key and then the key.

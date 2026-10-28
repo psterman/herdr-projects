@@ -155,3 +155,25 @@ fn text_to_paste_is_whole_in_a_small_window_the_arrows_scroll_it_and_any_other_k
     b.press(&["down"]);
     assert!(b.s.paste_text.is_empty());
 }
+
+#[test]
+fn the_key_that_opens_the_board_can_be_set_at_any_time_and_is_written_in_herdrs_config() {
+    let w = world();
+    let file = sw::extras::herdr_config();
+    std::fs::create_dir_all(file.parent().unwrap()).unwrap();
+    std::fs::write(&file, "[keys]\nprefix = \"ctrl+b\"\n").unwrap();
+    // A key herdr itself uses is refused, with what that key does today.
+    assert!(sw::extras::key::set("prefix+q").is_err(), "herdr's own key is not taken");
+    assert_eq!(std::fs::read_to_string(&file).unwrap(), "[keys]\nprefix = \"ctrl+b\"\n", "nothing was written");
+    // A key of its own is written into herdr's config, in the plugin's own block.
+    let said = sw::extras::key::set("alt+b").expect("a free key is taken");
+    assert!(said.contains("alt+b"), "{said}");
+    let text = std::fs::read_to_string(&file).unwrap();
+    assert!(text.contains("key = \"alt+b\"") && text.contains("command = \"herdr-projects.open\""), "{text}");
+    assert_eq!(sw::extras::board_key(), "alt+b", "the board's key is that one now");
+    // And it is one key press, not herdr's prefix and one more.
+    assert!(!sw::extras::board_key().starts_with("prefix+"), "{text}");
+    // The setting says it, and it is the board's own.
+    assert_eq!(sw::store::settings::lookup::setting("board.key", None), serde_json::json!("none"), "until it is set");
+    drop(w);
+}
