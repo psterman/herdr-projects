@@ -42,6 +42,18 @@ pub fn settings_command(cmd: &str, pos: &[String], w: &Where, value: Option<Valu
         }
         set_value(name, &v, &scope)?
     } else { unset_value(name, &scope)? };
+    // The key that opens the board is a key in herdr's own config: it is written there, and herdr is told to reload.
+    let mut key_note = String::new();
+    if name == crate::extras::key::BOARD_KEY && scope.task.is_none() && scope.repo.is_empty() && scope.coord.is_none() {
+        let chord = r.value.as_str().unwrap_or_default().trim().to_string();
+        if chord.is_empty() || chord == crate::store::settings::values::NONE { key_note = "herdr's own key for the board is left as it is".into(); }
+        else {
+            match crate::extras::key::set(&chord) {
+                Ok(said) => key_note = said,
+                Err(why) => crate::refuse!("{why}"),
+            }
+        }
+    }
     let fresh = task.as_ref().and_then(|t| get(t.s("id")));
     let scope2 = match &fresh { Some(t) => Scope::task(t), None => scope.clone() };
     let row = rows(&scope2).into_iter().find(|x| x.name == r.name);
@@ -53,8 +65,10 @@ pub fn settings_command(cmd: &str, pos: &[String], w: &Where, value: Option<Valu
             else { format!("A repo always has a key: {r2} is back to the one the board made from its name. Another: herdr-projects set repo.key <KEY> --repo {r2}") };
     }
     let text = format!("{}{place}: {}  ({}){}", r.name, say(&r.value), r.from, if note.is_empty() { String::new() } else { format!("\n{note}") });
+    let text = if key_note.is_empty() { text } else { format!("{text}\n{key_note}") };
     let mut j = obj(json!({ "name": r.name, "value": r.value, "from": r.from }));
     if !note.is_empty() { j.put("note", note); }
+    if !key_note.is_empty() { j.put("key", key_note); }
     Ok((Value::Object(j), text))
 }
 /// The coordinator a settings command names, by its key: a project coordinator's repo must be one the board knows.

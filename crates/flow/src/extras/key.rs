@@ -17,6 +17,8 @@ fn remove(text: &str) -> Option<String> {
 /// The file with the plugin's key block taken out, and the new one put in its place (or added, when there was none).
 fn with_key(text: &str, chord: &str) -> String {
     let out = remove(text).unwrap_or_else(|| text.to_string());
+    let out = out.trim_end();
+    let out = if out.is_empty() { String::new() } else { format!("{out}\n") };
     format!("{out}\n{}\n", block_text("key", chord))
 }
 /// The key that opens the board is this one: herdr's config is written with it, and herdr is told to reload. Ok(what

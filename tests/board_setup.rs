@@ -173,7 +173,17 @@ fn the_key_that_opens_the_board_can_be_set_at_any_time_and_is_written_in_herdrs_
     assert_eq!(sw::extras::board_key(), "alt+b", "the board's key is that one now");
     // And it is one key press, not herdr's prefix and one more.
     assert!(!sw::extras::board_key().starts_with("prefix+"), "{text}");
+    // A second key replaces the block, and there is only ever one of them.
+    sw::extras::key::set("alt+c").expect("another free key is taken");
+    let text = std::fs::read_to_string(&file).unwrap();
+    assert_eq!(text.matches("herdr-projects.open").count(), 1, "one block only: {text}");
+    assert!(text.contains("key = \"alt+c\"") && !text.contains("alt+b"), "{text}");
     // The setting says it, and it is the board's own.
     assert_eq!(sw::store::settings::lookup::setting("board.key", None), serde_json::json!("none"), "until it is set");
+    // The command line does the same: the key is written into herdr's config, not only remembered.
+    sw::extras::key::set("alt+b").expect("a free key is taken");
+    assert_eq!(sw::cli::main(vec!["set".into(), "board.key".into(), "alt+d".into()]), 0);
+    let text = std::fs::read_to_string(&file).unwrap();
+    assert!(text.contains("key = \"alt+d\""), "the command line writes it too: {text}");
     drop(w);
 }

@@ -135,17 +135,9 @@ fn set_mine(name: &str, value: Option<String>, repo: &str) -> crate::err::Res<Do
     let shown = match j.at("value") { Value::Bool(true) => "on".to_string(), Value::Bool(false) => "off".to_string(), v => say(v).lines().next().unwrap_or("").to_string() };
     let note = if j.s("note").is_empty() { String::new() } else { format!(" · {}", j.s("note")) };
     // The key that opens the board is a key in herdr's own config: it is written there, and herdr is told to reload.
-    if name == crate::extras::key::BOARD_KEY {
-        let chord = value.unwrap_or_default().trim().to_string();
-        if chord.is_empty() || chord == crate::store::settings::values::NONE {
-            return Ok(Done::say(format!("{label}: {shown}{note} · herdr's own key for the board is left as it is"), Ink::Green).and(Then::Saved(name.to_string())));
-        }
-        return match crate::extras::key::set(&chord) {
-            Ok(said) => Ok(Done::say(format!("{label}: {shown}{note} · {said}"), Ink::Green).and(Then::Saved(name.to_string()))),
-            Err(why) => Ok(Done::say(format!("{label}: {shown}{note} · {why}"), Ink::Red)),
-        };
-    }
-    Ok(Done::say(format!("{label}: {shown}{note}"), Ink::Green).and(Then::Saved(name.to_string())))
+    let key = j.t("key");
+    let key = if key.is_empty() { String::new() } else { format!(" · {key}") };
+    Ok(Done::say(format!("{label}: {shown}{note}{key}"), Ink::Green).and(Then::Saved(name.to_string())))
 }
 /// Into a task's agent: its real herdr pane. Its space may have been closed (archive closes it): it is reopened from
 /// the worktree first. Outside a herdr client (plain SSH) this terminal attaches to that one agent instead.
