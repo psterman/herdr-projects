@@ -81,9 +81,14 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
 `Alt+G` opens the menu that says what it shows.
 
 ```
+ ▤ ↗ ✓ ◷ ▥
  ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
 ```
+
+The first row is the panel's own: the mark of every chart the panel knows, the ones that are on in herdr's text and the
+ones that are off in the faint grey. **A click on a mark turns that chart on or off**, and what the panel shows is saved
+at once (`board.top`): the charts that are on are drawn below, in the order the marks stand in.
 
 | Chart | What it shows | Its mark |
 |---|---|---|

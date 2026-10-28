@@ -188,18 +188,20 @@ fn a_selected_or_pinned_done_task_is_folded_away_and_counted_too() {
     for id in &ids { sw::store::tasks::update(id, |t| { t.put("stage", "done"); Ok(sw::store::tasks::Change::Write) }).unwrap(); }
     let mut s = open(&w.root, 34);
     let text = |s: &mut common::board::Board| s.screen(80).join("\n");
+    // The panel's own row of marks is above the list: it has a mark of its own for every chart.
+    let list_text = |s: &mut common::board::Board| { let rows = s.screen(80); let at = s.s.list_at.map(|(t, _)| t).unwrap_or(0); rows[at..].join("\n") };
     let note = |n: usize| format!("↓ {n} done ({} shows them)", key_name("allDone"));
     // All done on a done task, then all done off: it goes too, and the selection goes to its heading.
     s.press(&["alt+d"]); s.s.sel = ids[0].clone(); s.load();
     assert!(text(&mut s).contains("One"));
     s.press(&["alt+d"]);
     let t = text(&mut s);
-    assert!(!t.contains("✓") && t.contains(&note(3)), "{t}");
+    assert!(!list_text(&mut s).contains("✓") && t.contains(&note(3)), "{t}");
     assert_eq!(s.s.sel, "head:status\t\tdone");
     // Pinned, it stays among the done ones (a pin moves nothing): folded away all the same, and counted.
     sw::actions::filing::pin(&ids[1]).unwrap(); s.load();
     let t = text(&mut s);
-    assert!(!t.contains("✓") && t.contains(&note(3)), "the done group's: {t}");
+    assert!(!list_text(&mut s).contains("✓") && t.contains(&note(3)), "the done group's: {t}");
     let web = common::board::web(&w, "board", serde_json::json!({}));
     let groups = web.at("list").arr("groups");
     assert!(groups.iter().flat_map(|g| g.arr("rows").to_vec()).all(|r| r.s("mark") != "✓"), "the web board's list is the same: {groups:?}");

@@ -57,12 +57,13 @@ fn list_part(s: &mut State, t: &Theme, w: usize, h: usize, screen_w: usize, abov
         // While its menu is open the panel keeps that room (room for every chart it knows), so that the menu stands
         // where it is when a chart is turned on or off, and a chart turned on takes its place at once.
         let room = h.saturating_sub(head.len()) / 2;
-        let panel_room = if s.top_panel.menu.is_some() { room.min(crate::board::top_panel::CHARTS.len()) } else { room };
+        let panel_room = if s.top_panel.menu.is_some() { room.min(crate::board::top_panel::CHARTS.len() + 1) } else { room };
         let mut panel = super::top_panel::lines(s, w, panel_room);
         // The panel keeps its room while the menu is open: a chart turned off leaves its row empty, and the menu
         // stands where it was, so that a click finds the chart it names.
         while s.top_panel.menu.is_some() && panel.len() < panel_room { panel.push(Inked::new()); }
         for h in s.top_panel.hits.iter_mut() { h.0 += above + head.len(); }
+        for h in s.top_panel.mark_hits.iter_mut() { h.0 += above + head.len(); }
         s.list_at = Some((above + head.len() + panel.len(), w));
         let mut v = head.clone();
         v.extend(panel);

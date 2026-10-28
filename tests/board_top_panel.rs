@@ -16,9 +16,20 @@ fn panel_rows(s: &mut Board, cols: usize) -> Vec<String> {
     let list = s.s.list_at.map(|(t, _)| t).unwrap_or(lines.len());
     lines[head..list.max(head)].to_vec()
 }
+/// The row of marks the panel shows on top: its icons, in the order they stand.
+fn marks(s: &mut Board, cols: usize) -> Vec<String> {
+    let rows = panel_rows(s, cols);
+    let row = rows.first().cloned().unwrap_or_default();
+    row.split_whitespace().map(|w| w.to_string()).collect()
+}
+/// The cell each of the panel's marks stands in, counted from the left of the window.
+fn mark_cells(row: &str) -> Vec<u16> {
+    ["▤", "↗", "✓", "◷", "▥"].iter().filter_map(|m| row.chars().position(|c| c.to_string() == *m).map(|n| n as u16)).collect()
+}
 /// The chart a row says, by what it says. An empty row is none: the panel keeps its room while its menu is open, and
-/// a chart that is turned off leaves its row empty.
+/// a chart that is turned off leaves its row empty. The row of marks is none either: it says which charts there are.
 fn chart_of(row: &str) -> String {
+    if row.contains("▤") || row.contains("↗") || row.contains("◷") || row.contains("▥") || row.contains("✓") { return String::new(); }
     for (says, name) in [("Nothing on the board", "states"), ("to do", "states"), (" new", "activity"), (" done", "finished"), ("wait", "waiting"), ("cap", "limits")] {
         if row.contains(says) { return name.to_string(); }
     }
@@ -53,15 +64,53 @@ fn the_panel_is_above_the_list_and_gives_way_when_the_room_is_small() {
     let w = world();
     w.add("Add a greeting");
     let mut s = open(&w.root, 30); s.s.side = false;
-    assert_eq!(panel_rows(&mut s, 120).len(), 2);
+    assert_eq!(panel_rows(&mut s, 120).len(), 3, "the row of marks and the two charts");
     // the panel is above the list: the list's first row is below it
     let list = s.s.list_at.map(|(t, _)| t).unwrap_or(0);
-    assert!(list >= 3, "the list starts below the panel: {list}");
+    assert!(list >= 4, "the list starts below the panel: {list}");
     // in a window too small for it, the panel gives way before the list does
     s.rows = 6;
     assert!(panel_rows(&mut s, 120).len() <= 1, "the panel gives way before the list");
     s.rows = 30;
-    assert_eq!(panel_rows(&mut s, 120).len(), 2, "with room, both charts are there");
+    assert_eq!(panel_rows(&mut s, 120).len(), 3, "with room, the marks and both charts are there");
+}
+
+#[test]
+fn the_panel_shows_a_row_of_marks_for_every_chart_and_a_click_on_one_turns_it_on_or_off() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    // The row of marks is there, with every chart's icon in it: the ones that are on first, then the ones that are off.
+    let rows = s.screen(120);
+    let line = rows.iter().position(|l| l.contains("▤")).expect("the row of marks is drawn") as u16;
+    assert!(rows[line as usize].contains("▤ ●") || rows[line as usize].contains("▤"), "{rows:?}");
+    // The first mark stands in the cell after the left edge, and each one is a cell of its own.
+    let cells = mark_cells(&rows[line as usize]);
+    assert_eq!(cells.len(), 5, "every chart has a mark: {rows:?}");
+    // A click on the waiting chart's mark turns it on, and the panel draws it at once.
+    s.click_at(cells[3], line);
+    assert!(charts(&mut s, 120).contains(&"waiting".to_string()), "the chart is on: {:?}", charts(&mut s, 120));
+    // And the same click turns it off again.
+    let rows = s.screen(120);
+    let line = rows.iter().position(|l| l.contains("▤")).unwrap() as u16;
+    let cells = mark_cells(&rows[line as usize]);
+    s.click_at(cells[3], line);
+    assert!(!charts(&mut s, 120).contains(&"waiting".to_string()), "and off again: {:?}", charts(&mut s, 120));
+}
+
+#[test]
+fn a_click_on_the_panel_s_marks_is_saved_and_the_board_keeps_it() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    let rows = s.screen(120);
+    let line = rows.iter().position(|l| l.contains("▤")).expect("the row of marks is drawn") as u16;
+    let cells = mark_cells(&rows[line as usize]);
+    s.click_at(cells[3], line);
+    s.load();
+    assert_eq!(said(), json!(["states", "activity", "waiting"]), "what the click left is saved");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    assert!(charts(&mut s, 120).contains(&"waiting".to_string()), "and the board keeps it");
 }
 
 #[test]

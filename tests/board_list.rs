@@ -2,7 +2,7 @@
 //! columns, the side panel that alt+p shows or hides, the whole task; the done list newest first; work whose review
 //! failed under needs you with "merge anyway"; what the list hides and what an action did; the wheel and the mouse.
 use crate::common;
-use common::board::open;
+use common::board::{open, Board};
 use common::*;
 use serde_json::json;
 use sw::board::keys::key_name;
@@ -87,7 +87,9 @@ fn the_done_list_is_newest_first_and_nothing_marks_a_task_as_read() {
         sw::store::tasks::update(id, |t| { t.put("at", now - (3 - n as i64) * 60000); t.put("seen", n != 0); Ok(sw::store::tasks::Change::Write) }).unwrap();
     }
     let mut s = open(&w.root, 34);
-    assert!(!s.screen(80).iter().any(|l| l.contains('✓')), "the list shows no done task");
+    // The panel's own row of marks is above the list: it has a mark of its own for every chart.
+    let list_rows = |s: &mut Board| { let rows = s.screen(80); let at = s.s.list_at.map(|(t, _)| t).unwrap_or(0); rows[at..].to_vec() };
+    assert!(!list_rows(&mut s).iter().any(|l| l.contains('✓')), "the list shows no done task");
     s.press(&["alt+d"]);
     let lines = s.screen(80);
     let at: Vec<usize> = titles.iter().map(|t| lines.iter().position(|l| has(l, r"^[ ▌]  ✓ PRJ-\d ") && l.chars().skip(11).collect::<String>().starts_with(t)).unwrap_or(0)).collect();

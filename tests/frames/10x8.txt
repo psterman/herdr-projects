@@ -1,6 +1,6 @@
 == the list
  herdr-pr…
- ████████
+ ▤ ↗ ✓ ◷ …
 ▌ ◐ Max
 ▌   length
 ──────────
@@ -36,7 +36,7 @@
   ↑↓ pick…
 == a draft
  herdr-pr…
- ████████
+ ▤ ↗ ✓ ◷ …
 ▌ ◐ Max
 ──────────
 ❯ Hello

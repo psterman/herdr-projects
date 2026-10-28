@@ -1,6 +1,7 @@
 == the list
  herdr-projects  proj
  All 18  tab next
+ ▤ ↗ ✓ ◷ ▥
  ███████████████  needs you 5 · ready 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
   ◇ #4     Max length for task titles
@@ -13,15 +14,13 @@
 ────────────────────────────────────────
 ❯ Add a task
 ────────────────────────────────────────
-
   alt+o open this task's agent
 == the task beside it
  herdr-projects  proj
  All 18  tab next
+ ▤ ↗ ✓ ◷ ▥
  ███████████████  needs you 5 · ready 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
-  ◇ #4     Max length for task titles
-           Starting                   1m
 ▌ ◐ #5     Max length for task titles
 ▌          Found the cause; now checking
 ▌          every caller of the resize h…
@@ -30,6 +29,7 @@
 ────────────────────────────────────────
 ❯ Add a task
 ────────────────────────────────────────
+
   Side panel on. alt+p hides it.
   alt+o open this task's agent
 == the whole task
@@ -69,6 +69,7 @@
 == a draft
  herdr-projects  proj
  All 18  tab next
+ ▤ ↗ ✓ ◷ ▥
  ███████████████  needs you 5 · ready 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
   ◇ #4     Max length for task titles
@@ -81,5 +82,4 @@
 ────────────────────────────────────────
 ❯ Hello 日本 🚀
 ────────────────────────────────────────
-
   enter add it as a task · esc put away

@@ -4,7 +4,7 @@ use super::Effect;
 use crate::board::job::Job;
 use crate::board::keys::{is, Press, K};
 use crate::board::state::{Caps, Numbers, State, TopMenu};
-use crate::board::top_panel::{self, CHARTS, DEFAULT};
+use crate::board::top_panel::{self, DEFAULT};
 use crate::json::*;
 use crate::shown::states::group_of;
 
@@ -61,9 +61,7 @@ pub fn charts(s: &State) -> Vec<&'static str> { match &s.top_panel.menu { Some(m
 /// The menu opens on the charts as they stand: the ones that are on first, in the order they are drawn, the ones that
 /// are off after them, in the order the panel knows them.
 pub fn open(s: &mut State) {
-    let on = top_panel::charts();
-    let mut charts: Vec<(String, bool)> = on.iter().map(|id| (id.to_string(), true)).collect();
-    for (id, ..) in CHARTS.iter() { if !on.contains(id) { charts.push((id.to_string(), false)); } }
+    let charts: Vec<(String, bool)> = top_panel::all().into_iter().map(|(id, on)| (id.to_string(), on)).collect();
     s.top_panel.menu = Some(TopMenu { at: 0, charts });
 }
 
@@ -116,6 +114,17 @@ pub fn click(s: &mut State, x: usize, y: usize) {
     let Some((_, from, to, at)) = s.top_panel.menu_hits.iter().find(|h| h.0 == y).copied() else { return };
     if x >= from && x < to { return turn(s, at); }
     pick(s, at as i64, s.top_panel.menu.as_ref().map(|m| m.charts.len()).unwrap_or(0));
+}
+
+/// A click on the panel's own row of marks: that chart is turned on or off, and what the panel shows is saved at once
+/// (there is no menu to save it later).
+pub fn click_mark(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
+    let Some((_, _, _, id)) = s.top_panel.mark_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).cloned() else { return };
+    let mut on = top_panel::charts();
+    if on.contains(&id.as_str()) { on.retain(|c| c != &id); } else { on.push(id.as_str()); }
+    let said: Vec<String> = on.into_iter().map(String::from).collect();
+    fx.push(Effect::Run(Job::Set { id: String::new(), name: top_panel::SETTING.into(), value: Some(said.join(", ")), whose: crate::board::state::Whose::You }));
+    fx.push(Effect::Load);
 }
 
 /// The chart at that place moves to another place in the menu: the panel draws it there.

@@ -1,10 +1,9 @@
 == the list
  herdr-projects  proj
  All 18   Needs 5   Working 9   Ready 1   To do 2   Done 1
+ ▤ ↗ ✓ ◷ ▥
  ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
-   ✗ #13    Max length for task titles                                        1m
-            Conflict with main
    ✗ #14    Max length for task titles                                        1m
             Stopped without a summary
    ▾ ready to approve
@@ -17,7 +16,8 @@
             Starting
 ▌  ◐ #5     Max length for task titles                                        1m
 ▌           Found the cause; now checking every caller of the resize handler fo…
- ↓ 9 more · ↑ 3 more
+
+ ↓ 9 more · ↑ 4 more
 
 ────────────────────────────────────────────────────────────────────────────────
 ❯ Add a task
@@ -26,6 +26,7 @@
 == the task beside it
  herdr-projects  proj
  All 18   Needs 5   Working 9   Ready 1   To do 2   Done 1
+ ▤ ↗ ✓ ◷ ▥
  ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
    ✗ #14    Max length for task titles                                        1m
@@ -40,7 +41,6 @@
             Starting
 ▌  ◐ #5     Max length for task titles                                        1m
 ▌           Found the cause; now checking every caller of the resize handler fo…
-
  ↓ 9 more · ↑ 4 more
 
 ────────────────────────────────────────────────────────────────────────────────
@@ -101,10 +101,9 @@
 == a draft
  herdr-projects  proj
  All 18   Needs 5   Working 9   Ready 1   To do 2   Done 1
+ ▤ ↗ ✓ ◷ ▥
  ████████████████████████  needs you 5 · ready 1 · working 9 · to do 2 · done 1
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
-   ✗ #13    Max length for task titles                                        1m
-            Conflict with main
    ✗ #14    Max length for task titles                                        1m
             Stopped without a summary
    ▾ ready to approve
@@ -117,7 +116,8 @@
             Starting
 ▌  ◐ #5     Max length for task titles                                        1m
 ▌           Found the cause; now checking every caller of the resize handler fo…
- ↓ 9 more · ↑ 3 more
+
+ ↓ 9 more · ↑ 4 more
 
 ────────────────────────────────────────────────────────────────────────────────
 ❯ Hello 日本 🚀

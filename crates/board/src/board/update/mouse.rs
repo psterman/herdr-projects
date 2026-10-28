@@ -38,6 +38,11 @@ pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
         if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
         return super::shows::set(s, n, fx);
     }
+    // A click on the panel's own row of marks turns that chart on or off (view/top_panel/marks.rs).
+    if s.top_panel.mark_hits.iter().any(|h| h.0 == y && x >= h.1 && x < h.2) {
+        if locked(s) { return s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); }
+        return super::top_panel::click_mark(s, x, y, fx);
+    }
     let id = if x < wide && y >= top { s.list_ids.get(y - top).cloned().unwrap_or_default() } else { String::new() };
     if id.is_empty() { return; }
     if locked(s) { if id != s.sel { s.flash("Send or put away what you typed first: a click does not change who gets it.", Ink::Muted); } return; }

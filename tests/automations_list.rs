@@ -126,7 +126,7 @@ fn more_automations_than_fit_the_list_says_how_many_it_does_not_show_and_the_sel
     // one of them only: said in the singular (the top panel's rows are above the list, so it needs room for its last line)
     for x in automations().into_iter().skip(1) { l::remove(x.s("id")).unwrap(); }
     for n in 4..=14 { w.add(&format!("Task {n}")); }
-    s.rows = 17; s.s.sel = "proj/14".into(); s.load();
+    s.rows = 18; s.s.sel = "proj/14".into(); s.load();
     let down = s.screen(100).into_iter().find(|l| l.starts_with(" ↓")).unwrap_or_default();
     like(&down, r"^ ↓ (\d+ more, )?1 automation( · ↑ \d+ more)?$");
 }

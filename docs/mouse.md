@@ -30,6 +30,8 @@ wheel must not send your answer to another agent. The next key brings the view b
 - **A click on the filter row** shows that filter, and on its first item goes round the machines as `Alt+M` does
   ([the board](board.md#the-filter-row)).
 - **A click on a part of the top panel's bar** shows that state, as the filter row does.
+- **A click on a mark of the top panel's own row** turns that chart on or off, and the panel shows it at once
+  ([the top panel](board.md#the-top-panel)).
 - **In the top panel's menu** (`Alt+G`): a click on a chart's icon turns that chart on or off, and a click anywhere else
   on its row picks it ([the top panel](board.md#the-top-panel)).
 - A click anywhere else (the header, the chat, the task panel) does nothing.

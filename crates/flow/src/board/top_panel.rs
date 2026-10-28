@@ -44,3 +44,12 @@ pub fn charts() -> Vec<&'static str> {
 }
 /// The charts that are on, as the setting says them: their ids in the order they are drawn.
 pub fn said() -> Vec<String> { charts().into_iter().map(String::from).collect() }
+/// Every chart the panel knows, with whether it is on: the ones that are on first, in the order they are drawn, the
+/// ones that are off after them, in the order the panel knows them. The menu's list and the panel's own row of marks
+/// are the same list.
+pub fn all() -> Vec<(&'static str, bool)> {
+    let on = charts();
+    let mut out: Vec<(&'static str, bool)> = on.iter().map(|id| (*id, true)).collect();
+    for (id, ..) in CHARTS.iter() { if !on.contains(id) { out.push((id, false)); } }
+    out
+}
