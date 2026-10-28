@@ -110,6 +110,14 @@ fn turn(s: &mut State, at: usize) {
     if let Some(m) = s.top_panel.menu.as_mut() { if let Some((_, on)) = m.charts.get_mut(at) { *on = !*on; } }
 }
 
+/// A click in the menu: on a chart's icon it turns that chart on or off, anywhere else on its row it picks it. Nothing
+/// else is touched: the menu stays open, and the panel above it follows at once.
+pub fn click(s: &mut State, x: usize, y: usize) {
+    let Some((_, from, to, at)) = s.top_panel.menu_hits.iter().find(|h| h.0 == y).copied() else { return };
+    if x >= from && x < to { return turn(s, at); }
+    pick(s, at as i64, s.top_panel.menu.as_ref().map(|m| m.charts.len()).unwrap_or(0));
+}
+
 /// The chart at that place moves to another place in the menu: the panel draws it there.
 fn move_to(s: &mut State, at: usize, to: usize) {
     let Some(m) = s.top_panel.menu.as_mut() else { return };

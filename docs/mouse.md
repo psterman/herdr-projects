@@ -29,6 +29,9 @@ wheel must not send your answer to another agent. The next key brings the view b
 - With words in the box, a click selects nothing and the board says why: `Send or put away what you typed first`.
 - **A click on the filter row** shows that filter, and on its first item goes round the machines as `Alt+M` does
   ([the board](board.md#the-filter-row)).
+- **A click on a part of the top panel's bar** shows that state, as the filter row does.
+- **In the top panel's menu** (`Alt+G`): a click on a chart's icon turns that chart on or off, and a click anywhere else
+  on its row picks it ([the top panel](board.md#the-top-panel)).
 - A click anywhere else (the header, the chat, the task panel) does nothing.
 
 ## Selecting and copying

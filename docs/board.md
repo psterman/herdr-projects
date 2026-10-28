@@ -85,18 +85,24 @@ sidebar ([other machines](other-machines.md)); a click on it does the same. Ever
  ▁▁▁▁▁▁▁▁▁▁▁▁▁█  18 new
 ```
 
-| Chart | What it shows |
-|---|---|
-| `States` | what the board holds, by state: one bar, each state in its own colour (the colours its marks have), and the counts of the states that have something in them. A click on a part of the bar shows that state, as the filter row does |
-| `Activity` | new tasks a day, for 14 days: a cell for each day, as high as that day was |
-| `Finished` | tasks that reached done, a day, the same way |
-| `Waiting` | how many wait for you, and how long the oldest of them has waited |
-| `Limits` | what the running tasks have used of their caps: the most used of them, what part of that is, and how many are near theirs |
+| Chart | What it shows | Its mark |
+|---|---|---|
+| `States` | what the board holds, by state: one bar, each state in its own colour (the colours its marks have), and the counts of the states that have something in them. A click on a part of the bar shows that state, as the filter row does | `▤` |
+| `Activity` | new tasks a day, for 14 days: a cell for each day, as high as that day was | `↗` |
+| `Finished` | tasks that reached done, a day, the same way | `✓` |
+| `Waiting` | how many wait for you, and how long the oldest of them has waited | `◷` |
+| `Limits` | what the running tasks have used of their caps: the most used of them, what part of that is, and how many are near theirs | `▥` |
 
-The menu lists the charts with a mark each (`●` on, `○` off): `Space` turns one on or off, `←` `→` move it to another
-place (the panel draws the ones that are on, in the order the menu has them), `d` puts the default back (the shape of the
-board, and how it grew), `g` and `G` go to the first or the last, `Esc` closes it. The panel above the menu follows
-every change at once. What the menu leaves is saved, and the board keeps it (`board.top`).
+The menu lists the charts with a mark each (`●` on, `○` off) and the icon of the chart beside it: `Space` turns one on
+or off, `←` `→` move it to another place (the panel draws the ones that are on, in the order the menu has them), `d`
+puts the default back (the shape of the board, and how it grew), `g` and `G` go to the first or the last, `Esc` closes
+it. The panel above the menu follows every change at once. What the menu leaves is saved, and the board keeps it
+(`board.top`).
+
+**The mouse works in the menu too.** A click on a chart's icon turns that chart on or off, as `Space` does on the
+picked one; a click anywhere else on its row picks it, as `↑` `↓` do. The menu stands where it is while it is open, so
+that every click finds the chart it names: the panel above it keeps its room, and a chart turned on or off takes its
+place there at once.
 
 While the menu is open the conversation gives up room for it, as it does under the `?` menu, and where the window is
 too small for every chart the menu shows the ones around the picked one.

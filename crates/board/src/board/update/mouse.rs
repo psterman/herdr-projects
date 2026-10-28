@@ -23,7 +23,9 @@ pub fn wheel(s: &mut State, y: usize, by: i64, _fx: &mut Vec<Effect>) {
 }
 /// A click on a row of the list selects it; on the selected one it does nothing more. On a heading it folds or unfolds it.
 pub fn click(s: &mut State, x: usize, y: usize, fx: &mut Vec<Effect>) {
-    if s.leaving || s.setup.is_some() || s.ask.is_some() || !s.paste_text.is_empty() || s.menu.is_some() || s.top_panel.menu.is_some() || s.full || s.auto_open { return; }
+    // The top panel's menu is open: the click is for it (on an icon, on a chart's row).
+    if s.top_panel.menu.is_some() { return super::top_panel::click(s, x, y); }
+    if s.leaving || s.setup.is_some() || s.ask.is_some() || !s.paste_text.is_empty() || s.menu.is_some() || s.full || s.auto_open { return; }
     let Some((top, wide)) = s.list_at else { return };
     // A click on the filter row shows that filter (view/shows_row.rs).
     if let Some(n) = s.show_hits.iter().find(|h| h.0 == y && x >= h.1 && x < h.2).map(|h| h.3) {

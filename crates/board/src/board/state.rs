@@ -109,9 +109,11 @@ impl TopMenu {
     pub fn said(&self) -> Vec<String> { self.on().into_iter().map(String::from).collect() }
 }
 /// The top panel on top of the list (view/top_panel/): the numbers its charts are drawn from, where each of them was
-/// drawn (for a click), and its menu while it is open.
+/// drawn (for a click), and its menu while it is open. `menu_hits`: where the menu's rows were drawn, for a click:
+/// (the line, the first cell of its icon, the last, the chart's place in the menu). A click on the icon turns that
+/// chart on or off, a click on the row picks it.
 #[derive(Clone, Debug, Default)]
-pub struct TopPanel { pub numbers: Numbers, pub hits: Vec<(usize, usize, usize, usize)>, pub menu: Option<TopMenu> }
+pub struct TopPanel { pub numbers: Numbers, pub hits: Vec<(usize, usize, usize, usize)>, pub menu: Option<TopMenu>, pub menu_hits: Vec<(usize, usize, usize, usize)> }
 
 /// The web board's own (webui/web.rs): the agent page to go to (`going`: one held, with when, until the web UI shows
 /// that pane: webui/going.rs), how often the settings part was asked for, the messages

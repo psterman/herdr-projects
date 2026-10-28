@@ -16,6 +16,17 @@ pub const CHARTS: [(&str, &str, &str); 5] = [
 pub const DEFAULT: [&str; 2] = ["states", "activity"];
 /// The chart of that id, if it is one of ours.
 pub fn chart(id: &str) -> Option<(&'static str, &'static str, &'static str)> { CHARTS.iter().find(|(c, ..)| *c == id).copied() }
+/// The mark of each chart, the one the menu draws beside it and a click takes: what the chart shows, in one cell.
+pub fn icon(id: &str) -> &'static str {
+    match id {
+        "states" => "▤",   // what the board holds, by state: a bar of cells
+        "activity" => "↗", // new tasks a day: rising
+        "finished" => "✓",  // tasks that reached done
+        "waiting" => "◷",  // how long the oldest of them has waited: a clock
+        "limits" => "▥",   // what the running tasks have used of their caps: a bar of a cap
+        _ => "·",
+    }
+}
 /// The charts that are on, in the order they are drawn: the ones you named, in your order. A name that is not a chart
 /// is left out, and a chart named twice is said once.
 pub fn charts() -> Vec<&'static str> {

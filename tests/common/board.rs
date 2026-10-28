@@ -71,6 +71,8 @@ impl Board {
     pub fn inked(&mut self, cols: usize) -> Vec<sw::shown::ink::Inked> { sw::board::view::screen(&mut self.s, &self.theme, cols, self.rows).lines }
     pub fn wheel(&mut self, y: u16, by: i64) { let fx = update(&mut self.s, Event::Wheel { x: 5, y, by }); self.effects(fx); }
     pub fn click(&mut self, y: u16) { let fx = update(&mut self.s, Event::Click { x: 5, y }); self.effects(fx); }
+    /// A click at a cell of its own, where the pointer stands.
+    pub fn click_at(&mut self, x: u16, y: u16) { let fx = update(&mut self.s, Event::Click { x, y }); self.effects(fx); }
     pub fn chat(&mut self, cols: usize) -> Chat {
         let lines = self.screen(cols);
         let top = lines.iter().rposition(|l| l.starts_with("╭─") && l.ends_with('╮'));

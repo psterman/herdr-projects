@@ -16,7 +16,8 @@ fn panel_rows(s: &mut Board, cols: usize) -> Vec<String> {
     let list = s.s.list_at.map(|(t, _)| t).unwrap_or(lines.len());
     lines[head..list.max(head)].to_vec()
 }
-/// The chart a row says, by what it says.
+/// The chart a row says, by what it says. An empty row is none: the panel keeps its room while its menu is open, and
+/// a chart that is turned off leaves its row empty.
 fn chart_of(row: &str) -> String {
     for (says, name) in [("Nothing on the board", "states"), ("to do", "states"), (" new", "activity"), (" done", "finished"), ("wait", "waiting"), ("cap", "limits")] {
         if row.contains(says) { return name.to_string(); }
@@ -24,7 +25,7 @@ fn chart_of(row: &str) -> String {
     row.to_string()
 }
 /// The charts the panel shows, in the order it draws them.
-fn charts(s: &mut Board, cols: usize) -> Vec<String> { panel_rows(s, cols).iter().map(|r| chart_of(r)).collect() }
+fn charts(s: &mut Board, cols: usize) -> Vec<String> { panel_rows(s, cols).iter().map(|r| chart_of(r)).filter(|c| !c.is_empty()).collect() }
 /// The setting as it stands.
 fn said() -> Value { sw::store::settings::lookup::setting("board.top", None) }
 
@@ -150,4 +151,49 @@ fn the_menu_shows_every_chart_where_there_is_room_and_the_picked_one_where_there
     s.press(&["g"]); // the first one
     let rows = s.screen(120);
     assert!(rows.iter().any(|l| l.contains("States")), "and the first one is in sight too: {rows:?}");
+}
+
+#[test]
+fn every_chart_has_its_own_icon_in_the_menu() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    s.press(&["alt+g"]);
+    let rows = s.screen(120);
+    // the icon of each chart, and the mark that says whether it is on
+    for (icon, name) in [("▤", "States"), ("↗", "Activity"), ("✓", "Finished"), ("◷", "Waiting"), ("▥", "Limits")] {
+        assert!(rows.iter().any(|l| l.contains(&format!("{icon} ● {name}")) || l.contains(&format!("{icon} ○ {name}"))), "the {name} row has its icon: {rows:?}");
+    }
+}
+
+#[test]
+fn a_click_on_an_icon_turns_that_chart_on_or_off_and_the_panel_follows() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    s.press(&["alt+g"]);
+    let rows = s.screen(120);
+    let line = rows.iter().position(|l| l.contains("◷ ○ Waiting")).expect("the waiting chart is there") as u16;
+    // the icon's cell: the same on every row, so the click finds the chart it names
+    s.click_at(3, line);
+    assert!(s.screen(120).iter().any(|l| l.contains("◷ ● Waiting")), "the chart is on: {:?}", s.screen(120));
+    assert!(charts(&mut s, 120).contains(&"waiting".to_string()), "the panel draws it at once: {:?}", charts(&mut s, 120));
+    // the menu stands where it was, so that the next click finds the chart it names
+    let rows = s.screen(120);
+    assert_eq!(rows.iter().position(|l| l.contains("◷ ● Waiting")), Some(line as usize), "the menu did not move: {rows:?}");
+    s.click_at(3, line);
+    assert!(!charts(&mut s, 120).contains(&"waiting".to_string()), "and off again: {:?}", charts(&mut s, 120));
+}
+
+#[test]
+fn a_click_on_a_chart_row_picks_it_and_the_menu_stays_open() {
+    let w = world();
+    w.add("Add a greeting");
+    let mut s = open(&w.root, 30); s.s.side = false;
+    s.press(&["alt+g"]);
+    let rows = s.screen(120);
+    let line = rows.iter().position(|l| l.contains("● Activity")).expect("the activity chart is there") as u16;
+    s.click_at(12, line); // its name, not its icon
+    assert_eq!(s.s.top_panel.menu.as_ref().map(|m| m.at), Some(1), "the chart is picked");
+    assert!(s.s.top_panel.menu.is_some(), "the menu stays open");
 }
